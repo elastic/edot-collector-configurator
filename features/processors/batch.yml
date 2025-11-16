@@ -5,7 +5,6 @@ vars:
 configuration:
   default:
     content:
-      batch:
-        send_batch_size: $vars.size
-        timeout: $vars.timeout
-        send_batch_max_size: $vars.max_size
+      send_batch_size: $vars.size
+      timeout: $vars.timeout
+      send_batch_max_size: $vars.max_size
