@@ -42,7 +42,10 @@ func BuildFeature(params Params) (map[string]any, error) {
 		if !ok {
 			return nil, fmt.Errorf("couldn't find configuration named '%v'", key)
 		}
-		mergeMaps(body, configuration.Content)
+		err := mergeMaps(body, configuration.Content)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return map[string]any{
@@ -50,14 +53,24 @@ func BuildFeature(params Params) (map[string]any, error) {
 	}, nil
 }
 
-func mergeMaps(dst map[string]any, src map[string]any) {
+func mergeMaps(dst map[string]any, src map[string]any) error {
+	var err error = nil
 	for k, v := range src {
-		if reflect.TypeOf(v).Kind() == reflect.Map && dst[k] != nil {
-			mergeMaps(dst[k].(map[string]any), v.(map[string]any))
+		dstVal, found := dst[k]
+		if found {
+			if reflect.TypeOf(v).Kind() == reflect.Map {
+				err = mergeMaps(dstVal.(map[string]any), v.(map[string]any))
+			} else {
+				err = fmt.Errorf("key overlap for '%v'", k)
+			}
 		} else {
 			dst[k] = v
 		}
+		if err != nil {
+			break
+		}
 	}
+	return err
 }
 
 func parseFeatureFile(data io.Reader) (*feature, error) {

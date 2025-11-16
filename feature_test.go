@@ -33,20 +33,36 @@ configuration:
           endpoint: grpc_endpoint
 `
 
+var unmergeableConfiguration = `
+configuration:
+  first:
+    content:
+      protocol:
+        http:
+          endpoint: first_http_endpoint
+  second:
+    content:
+      protocol:
+        http:
+          endpoint: second_http_endpoint
+`
+
 func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
-		testName       string
-		input          string
-		featureType    string
-		configurations []string
-		expected       map[string]any
+		testName             string
+		input                string
+		featureType          string
+		configurations       []string
+		expectedResult       map[string]any
+		expectedErrorMessage string
+		shouldFail           bool
 	}{
 		{
 			testName:       "select configuration",
 			input:          simpleConfiguration,
 			featureType:    "elasticsearch",
 			configurations: []string{"someconfig"},
-			expected: map[string]any{
+			expectedResult: map[string]any{
 				"elasticsearch": map[string]any{
 					"endpoint": "someconfig_endpoint",
 					"api_key":  "someconfig_api_key",
@@ -58,7 +74,7 @@ func TestBuildFeature(t *testing.T) {
 			input:          simpleConfiguration,
 			featureType:    "elasticsearch",
 			configurations: []string{},
-			expected: map[string]any{
+			expectedResult: map[string]any{
 				"elasticsearch": map[string]any{
 					"endpoint": "default_endpoint",
 					"api_key":  "default_api_key",
@@ -70,7 +86,7 @@ func TestBuildFeature(t *testing.T) {
 			input:          mergeableConfiguration,
 			featureType:    "otlp",
 			configurations: []string{"http", "grpc"},
-			expected: map[string]any{
+			expectedResult: map[string]any{
 				"otlp": map[string]any{
 					"protocol": map[string]any{
 						"http": map[string]any{
@@ -83,6 +99,14 @@ func TestBuildFeature(t *testing.T) {
 				},
 			},
 		},
+		{
+			testName:             "fail merging configurations",
+			input:                unmergeableConfiguration,
+			featureType:          "otlp",
+			configurations:       []string{"first", "second"},
+			shouldFail:           true,
+			expectedErrorMessage: "key overlap for 'endpoint'",
+		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
 			result, err := BuildFeature(Params{
@@ -91,8 +115,12 @@ func TestBuildFeature(t *testing.T) {
 				ConfigurationNames: tc.configurations,
 			})
 
-			assert.NoError(t, err)
-			assert.Equal(t, tc.expected, result)
+			if tc.shouldFail {
+				assert.EqualError(t, err, tc.expectedErrorMessage)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expectedResult, result)
+			}
 		})
 	}
 }
