@@ -33,8 +33,7 @@ func BuildFeature(params Params) (map[string]any, error) {
 		return nil, err
 	}
 	body := make(map[string]any)
-	for i := range params.ConfigurationNames {
-		key := params.ConfigurationNames[i]
+	for _, key := range params.ConfigurationNames {
 		configuration, ok := feature.Configuration[key]
 		if !ok {
 			return nil, fmt.Errorf("couldn't find configuration named '%v'", key)
