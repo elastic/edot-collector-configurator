@@ -180,7 +180,8 @@ func isMap(value any) bool {
 }
 
 func isList(value any) bool {
-	return reflect.TypeOf(value).Kind() == reflect.Slice
+	kind := reflect.TypeOf(value).Kind()
+	return kind == reflect.Slice || kind == reflect.Array
 }
 
 func isString(value any) bool {

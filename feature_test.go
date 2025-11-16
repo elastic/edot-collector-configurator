@@ -50,7 +50,7 @@ configuration:
 var configurationWithVars = `
 vars:
   first: global_first
-  second: global_second
+  second: false
   third: global_third
   fourth: global_fourth
 configuration:
@@ -61,8 +61,11 @@ configuration:
       third_placeholder: $vars.third
       some_list:
         - The fourth is $vars.fourth
+      some_map_list:
+        - some_key: Some value
+          some_other_key: Some other value $vars.third
     vars:
-      second: config_second
+      second: true
       third: config_third 
 `
 
@@ -139,9 +142,15 @@ func TestBuildFeature(t *testing.T) {
 			expectedResult: map[string]any{
 				"dummy": map[string]any{
 					"first_placeholder":  "global_first",
-					"second_placeholder": "config_second",
+					"second_placeholder": true,
 					"third_placeholder":  "external_third",
 					"some_list":          []any{"The fourth is external_fourth"},
+					"some_map_list": []any{
+						map[string]any{
+							"some_key":       "Some value",
+							"some_other_key": "Some other value external_third",
+						},
+					},
 				},
 			},
 		},
