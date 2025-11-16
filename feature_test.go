@@ -7,36 +7,56 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var singleConfiguration = `
+var simpleCase = `
 configuration:
+  default:
+    content:
+      endpoint: default_endpoint
+      api_key: default_api_key
   someconfig:
     content:
-      endpoint: http://some.endpoint
-      api_key: some_api_key
+      endpoint: someconfig_endpoint
+      api_key: someconfig_api_key
 `
 
 func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
-		name     string
-		input    string
-		expected map[string]any
+		testname       string
+		input          string
+		featureType    string
+		configurations []string
+		expected       map[string]any
 	}{
 		{
-			name:  "single configuration",
-			input: singleConfiguration,
+			testname:       "select configuration",
+			input:          simpleCase,
+			featureType:    "elasticsearch",
+			configurations: []string{"someconfig"},
 			expected: map[string]any{
 				"elasticsearch": map[string]any{
-					"endpoint": "http://some.endpoint",
-					"api_key":  "some_api_key",
+					"endpoint": "someconfig_endpoint",
+					"api_key":  "someconfig_api_key",
+				},
+			},
+		},
+		{
+			testname:       "using default config when no one provided",
+			input:          simpleCase,
+			featureType:    "elasticsearch",
+			configurations: []string{},
+			expected: map[string]any{
+				"elasticsearch": map[string]any{
+					"endpoint": "default_endpoint",
+					"api_key":  "default_api_key",
 				},
 			},
 		},
 	} {
-		t.Run(tc.name, func(t *testing.T) {
+		t.Run(tc.testname, func(t *testing.T) {
 			result, err := BuildFeature(Params{
-				Type:               "elasticsearch",
+				Type:               tc.featureType,
 				SourceFileReader:   strings.NewReader(tc.input),
-				ConfigurationNames: []string{"someconfig"},
+				ConfigurationNames: tc.configurations,
 			})
 
 			assert.NoError(t, err)
