@@ -33,7 +33,11 @@ func BuildFeature(params Params) (map[string]any, error) {
 		return nil, err
 	}
 	body := make(map[string]any)
-	for _, key := range params.ConfigurationNames {
+	var configs = params.ConfigurationNames
+	if len(configs) == 0 {
+		configs = []string{"default"}
+	}
+	for _, key := range configs {
 		configuration, ok := feature.Configuration[key]
 		if !ok {
 			return nil, fmt.Errorf("couldn't find configuration named '%v'", key)

@@ -40,7 +40,7 @@ func TestBuildFeature(t *testing.T) {
 			},
 		},
 		{
-			testname:       "using default config when no one provided",
+			testname:       "using default config when none provided",
 			input:          simpleCase,
 			featureType:    "elasticsearch",
 			configurations: []string{},
