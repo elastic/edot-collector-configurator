@@ -7,7 +7,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var simpleCase = `
+var simpleConfiguration = `
 configuration:
   default:
     content:
@@ -21,15 +21,15 @@ configuration:
 
 func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
-		testname       string
+		testName       string
 		input          string
 		featureType    string
 		configurations []string
 		expected       map[string]any
 	}{
 		{
-			testname:       "select configuration",
-			input:          simpleCase,
+			testName:       "select configuration",
+			input:          simpleConfiguration,
 			featureType:    "elasticsearch",
 			configurations: []string{"someconfig"},
 			expected: map[string]any{
@@ -40,8 +40,8 @@ func TestBuildFeature(t *testing.T) {
 			},
 		},
 		{
-			testname:       "using default config when none provided",
-			input:          simpleCase,
+			testName:       "using default config when none provided",
+			input:          simpleConfiguration,
 			featureType:    "elasticsearch",
 			configurations: []string{},
 			expected: map[string]any{
@@ -52,7 +52,7 @@ func TestBuildFeature(t *testing.T) {
 			},
 		},
 	} {
-		t.Run(tc.testname, func(t *testing.T) {
+		t.Run(tc.testName, func(t *testing.T) {
 			result, err := BuildFeature(Params{
 				Type:               tc.featureType,
 				SourceFileReader:   strings.NewReader(tc.input),
