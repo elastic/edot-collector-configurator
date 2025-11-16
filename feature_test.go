@@ -59,7 +59,8 @@ configuration:
       first_placeholder: $vars.first
       second_placeholder: $vars.second
       third_placeholder: $vars.third
-      fourth_placeholder: $vars.fourth
+      some_list:
+        - The fourth is $vars.fourth
     vars:
       second: config_second
       third: config_third 
@@ -71,7 +72,7 @@ func TestBuildFeature(t *testing.T) {
 		input                string
 		featureType          string
 		configurations       []string
-		vars                 map[string]string
+		vars                 map[string]any
 		expectedResult       map[string]any
 		expectedErrorMessage string
 		shouldFail           bool
@@ -131,7 +132,7 @@ func TestBuildFeature(t *testing.T) {
 			input:          configurationWithVars,
 			featureType:    "dummy",
 			configurations: []string{"default"},
-			vars: map[string]string{
+			vars: map[string]any{
 				"third":  "external_third",
 				"fourth": "external_fourth",
 			},
@@ -140,7 +141,7 @@ func TestBuildFeature(t *testing.T) {
 					"first_placeholder":  "global_first",
 					"second_placeholder": "config_second",
 					"third_placeholder":  "external_third",
-					"fourth_placeholder": "external_fourth",
+					"some_list":          []any{"The fourth is external_fourth"},
 				},
 			},
 		},
@@ -150,6 +151,7 @@ func TestBuildFeature(t *testing.T) {
 				Type:               tc.featureType,
 				SourceFileReader:   strings.NewReader(tc.input),
 				ConfigurationNames: tc.configurations,
+				Vars:               tc.vars,
 			})
 
 			if tc.shouldFail {
