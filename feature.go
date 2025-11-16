@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"maps"
-	"strings"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/goccy/go-yaml"
@@ -11,7 +11,7 @@ import (
 
 type FeatureParams struct {
 	RootName           string
-	SourceFile         []byte
+	SourceFileReader   io.Reader
 	ConfigurationNames []string
 }
 
@@ -24,7 +24,7 @@ type feature struct {
 }
 
 func BuildFeature(params FeatureParams) (map[string]any, error) {
-	feature, err := parseFeatureFile(params.SourceFile)
+	feature, err := parseFeatureFile(params.SourceFileReader)
 	if err != nil {
 		return nil, err
 	}
@@ -43,11 +43,11 @@ func BuildFeature(params FeatureParams) (map[string]any, error) {
 	}, nil
 }
 
-func parseFeatureFile(data []byte) (*feature, error) {
+func parseFeatureFile(data io.Reader) (*feature, error) {
 	validate := validator.New()
 	result := feature{}
 	dec := yaml.NewDecoder(
-		strings.NewReader(string(data)),
+		data,
 		yaml.Validator(validate),
 		yaml.Strict(),
 	)

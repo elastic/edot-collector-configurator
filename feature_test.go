@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,7 +23,7 @@ configuration:
 	}
 	result, err := BuildFeature(FeatureParams{
 		RootName:           "elasticsearch",
-		SourceFile:         []byte(yml),
+		SourceFileReader:   strings.NewReader(yml),
 		ConfigurationNames: []string{"someconfig"},
 	})
 
