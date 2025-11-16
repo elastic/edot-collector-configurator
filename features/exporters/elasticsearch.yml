@@ -1,0 +1,16 @@
+refs:
+  base:
+    endpoint: $vars.elastic_endpoint
+    api_key: $vars.elastic_api_key
+    mapping:
+      mode: otel
+configuration:
+  default:
+    content: $refs.base
+  test:
+    content: $refs.base
+    append:
+      - path: "$"
+        content:
+          tls:
+            insecure: true

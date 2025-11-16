@@ -1,0 +1,18 @@
+refs:
+  base:
+    otlp:
+      protocols: 
+        $refs.protocol
+configuration:
+  http:
+    content: $refs.base
+    refs:
+      protocol:
+        http:
+          endpoint: 0.0.0.0:4318
+  grpc:
+    content: $refs.base
+    refs:
+      protocol:
+        grpc:
+          endpoint: 0.0.0.0:4317
