@@ -19,6 +19,20 @@ configuration:
       api_key: someconfig_api_key
 `
 
+var mergeableConfiguration = `
+configuration:
+  http:
+    content:
+      protocol:
+        http:
+          endpoint: http_endpoint
+  grpc:
+    content:
+      protocol:
+        grpc:
+          endpoint: grpc_endpoint
+`
+
 func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
 		testName       string
@@ -48,6 +62,24 @@ func TestBuildFeature(t *testing.T) {
 				"elasticsearch": map[string]any{
 					"endpoint": "default_endpoint",
 					"api_key":  "default_api_key",
+				},
+			},
+		},
+		{
+			testName:       "merging configurations",
+			input:          mergeableConfiguration,
+			featureType:    "otlp",
+			configurations: []string{"http", "grpc"},
+			expected: map[string]any{
+				"otlp": map[string]any{
+					"protocol": map[string]any{
+						"http": map[string]any{
+							"endpoint": "http_endpoint",
+						},
+						"grpc": map[string]any{
+							"endpoint": "grpc_endpoint",
+						},
+					},
 				},
 			},
 		},

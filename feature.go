@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
-	"maps"
+	"reflect"
 
 	"github.com/go-playground/validator/v10"
 	"github.com/goccy/go-yaml"
@@ -42,12 +42,22 @@ func BuildFeature(params Params) (map[string]any, error) {
 		if !ok {
 			return nil, fmt.Errorf("couldn't find configuration named '%v'", key)
 		}
-		maps.Copy(body, configuration.Content)
+		mergeMaps(body, configuration.Content)
 	}
 
 	return map[string]any{
 		params.Type: body,
 	}, nil
+}
+
+func mergeMaps(dst map[string]any, src map[string]any) {
+	for k, v := range src {
+		if reflect.TypeOf(v).Kind() == reflect.Map && dst[k] != nil {
+			mergeMaps(dst[k].(map[string]any), v.(map[string]any))
+		} else {
+			dst[k] = v
+		}
+	}
 }
 
 func parseFeatureFile(data io.Reader) (*feature, error) {
