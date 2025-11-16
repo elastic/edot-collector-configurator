@@ -13,6 +13,7 @@ type Params struct {
 	Type               string
 	SourceFileReader   io.Reader
 	ConfigurationNames []string
+	Vars               map[string]string
 }
 
 func NewParams(sourceFilePath string, configurationNames []string) Params {
@@ -21,10 +22,12 @@ func NewParams(sourceFilePath string, configurationNames []string) Params {
 
 type configuration struct {
 	Content map[string]any `validate:"required"`
+	Vars    map[string]string
 }
 
 type feature struct {
 	Configuration map[string]configuration `validate:"required"`
+	Vars          map[string]string
 }
 
 func BuildFeature(params Params) (map[string]any, error) {

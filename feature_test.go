@@ -47,12 +47,31 @@ configuration:
           endpoint: second_http_endpoint
 `
 
+var configurationWithVars = `
+vars:
+  first: global_first
+  second: global_second
+  third: global_third
+  fourth: global_fourth
+configuration:
+  default:
+    content:
+      first_placeholder: $vars.first
+      second_placeholder: $vars.second
+      third_placeholder: $vars.third
+      fourth_placeholder: $vars.fourth
+    vars:
+      second: config_second
+      third: config_third 
+`
+
 func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
 		testName             string
 		input                string
 		featureType          string
 		configurations       []string
+		vars                 map[string]string
 		expectedResult       map[string]any
 		expectedErrorMessage string
 		shouldFail           bool
@@ -106,6 +125,24 @@ func TestBuildFeature(t *testing.T) {
 			configurations:       []string{"first", "second"},
 			shouldFail:           true,
 			expectedErrorMessage: "key overlap for 'endpoint'",
+		},
+		{
+			testName:       "variables overriding",
+			input:          configurationWithVars,
+			featureType:    "dummy",
+			configurations: []string{"default"},
+			vars: map[string]string{
+				"third":  "external_third",
+				"fourth": "external_fourth",
+			},
+			expectedResult: map[string]any{
+				"dummy": map[string]any{
+					"first_placeholder":  "global_first",
+					"second_placeholder": "config_second",
+					"third_placeholder":  "external_third",
+					"fourth_placeholder": "external_fourth",
+				},
+			},
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
