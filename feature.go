@@ -20,14 +20,16 @@ func NewParams(sourceFilePath string, configurationNames []string) Params {
 	panic("implement")
 }
 
+type vars map[string]string
+
 type configuration struct {
 	Content map[string]any `validate:"required"`
-	Vars    map[string]string
+	Vars    vars
 }
 
 type feature struct {
 	Configuration map[string]configuration `validate:"required"`
-	Vars          map[string]string
+	Vars          vars
 }
 
 func BuildFeature(params Params) (map[string]any, error) {
