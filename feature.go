@@ -9,10 +9,14 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-type FeatureParams struct {
-	RootName           string
+type Params struct {
+	Type               string
 	SourceFileReader   io.Reader
 	ConfigurationNames []string
+}
+
+func NewParams(sourceFilePath string, configurationNames []string) Params {
+	panic("implement")
 }
 
 type configuration struct {
@@ -23,7 +27,7 @@ type feature struct {
 	Configuration map[string]configuration `validate:"required"`
 }
 
-func BuildFeature(params FeatureParams) (map[string]any, error) {
+func BuildFeature(params Params) (map[string]any, error) {
 	feature, err := parseFeatureFile(params.SourceFileReader)
 	if err != nil {
 		return nil, err
@@ -39,7 +43,7 @@ func BuildFeature(params FeatureParams) (map[string]any, error) {
 	}
 
 	return map[string]any{
-		params.RootName: body,
+		params.Type: body,
 	}, nil
 }
 

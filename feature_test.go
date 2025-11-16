@@ -21,8 +21,8 @@ configuration:
 			"api_key":  "some_api_key",
 		},
 	}
-	result, err := BuildFeature(FeatureParams{
-		RootName:           "elasticsearch",
+	result, err := BuildFeature(Params{
+		Type:               "elasticsearch",
 		SourceFileReader:   strings.NewReader(yml),
 		ConfigurationNames: []string{"someconfig"},
 	})
