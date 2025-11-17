@@ -248,7 +248,7 @@ func TestBuildFeature(t *testing.T) {
 			configurations: []string{"default"},
 			expectedResult: map[string]any{
 				"dummy": map[string]any{
-					"first_placeholder":  "golbal_first",
+					"first_placeholder":  "global_first",
 					"second_placeholder": "config_second",
 					"some_map": map[string]any{
 						"first_key":          "first value",
@@ -258,7 +258,7 @@ func TestBuildFeature(t *testing.T) {
 						"Monday",
 						"Tuesday",
 						"Wednesday",
-						"Thrusday",
+						"Thursday",
 						"Friday",
 						"global_first",
 					},

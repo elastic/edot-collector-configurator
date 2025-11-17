@@ -46,6 +46,7 @@ type featureType struct {
 }
 
 func BuildFeature(params Params) (map[string]any, error) {
+	var err error
 	feature, err := parseFeatureFile(params.SourceFileReader)
 	if err != nil {
 		return nil, err
@@ -69,6 +70,10 @@ func BuildFeature(params Params) (map[string]any, error) {
 		if err != nil {
 			return nil, err
 		}
+		err = appendItems(body, configuration.Append)
+		if err != nil {
+			return nil, err
+		}
 
 		configVars := collectVars(feature, configuration, params)
 
@@ -81,6 +86,74 @@ func BuildFeature(params Params) (map[string]any, error) {
 	return map[string]any{
 		params.Type: body,
 	}, nil
+}
+
+func appendItems(body map[string]any, appendType []appendType) error {
+	var err error
+	for _, item := range appendType {
+		err = appendItem(body, item)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func appendItem(body map[string]any, item appendType) error {
+	var err error
+	path, err := parseYamlPath(item.Path)
+	if err != nil {
+		return err
+	}
+	if isMap(item.Content) {
+		err = appendMapItems(body, path, item.Content.(map[string]any))
+		if err != nil {
+			return err
+		}
+	} else if isList(item.Content) {
+		err = appendListItems(body, path, item.Content.([]any))
+		if err != nil {
+			return err
+		}
+	} else {
+		return fmt.Errorf("invalid append content type, must be a map or list - it's: %v", getKind(item.Content))
+	}
+	return nil
+}
+
+func appendMapItems(body map[string]any, path []string, content map[string]any) error {
+	var targetMap map[string]any = body
+	var ok bool
+	for _, pathItem := range path {
+		targetMap, ok = targetMap[pathItem].(map[string]any)
+		if !ok {
+			return fmt.Errorf("could not find item '%s' via yaml path: %v", pathItem, path)
+		}
+	}
+	for k, v := range content {
+		if targetMap[k] != nil {
+			return fmt.Errorf("key '%s' already exists in target map, cannot append existing keys", k)
+		}
+		targetMap[k] = v
+	}
+	return nil
+}
+
+func appendListItems(body map[string]any, path []string, content []any) error {
+	var targetMap map[string]any = body
+	var pathToMap = path[:len(path)-1]
+	var ok bool
+	for _, pathItem := range pathToMap {
+		targetMap, ok = targetMap[pathItem].(map[string]any)
+		if !ok {
+			return fmt.Errorf("could not find item '%s' via yaml path: %v", pathItem, path)
+		}
+	}
+	listKey := path[len(path)-1]
+	originalList := targetMap[listKey].([]any)
+	targetMap[listKey] = append(originalList, content...)
+
+	return nil
 }
 
 var refsPattern = regexp.MustCompile(`^\$refs\.[^\s]+$`)
@@ -103,7 +176,7 @@ func resolveConfigContent(content any, configRefs refsType) (map[string]any, err
 		}
 		return mapRef, nil
 	}
-	return nil, fmt.Errorf("invalid content type, must be a map or a ref to a map. It's: %v", content)
+	return nil, fmt.Errorf("invalid content type, must be a map or a ref to a map - it's: %v", getKind(content))
 }
 
 func resolveMapRefs(content map[string]any, configRefs refsType) error {
@@ -256,16 +329,20 @@ func mergeMaps(dst map[string]any, src map[string]any) error {
 }
 
 func isMap(value any) bool {
-	return reflect.TypeOf(value).Kind() == reflect.Map
+	return getKind(value) == reflect.Map
 }
 
 func isList(value any) bool {
-	kind := reflect.TypeOf(value).Kind()
+	kind := getKind(value)
 	return kind == reflect.Slice || kind == reflect.Array
 }
 
 func isString(value any) bool {
-	return reflect.TypeOf(value).Kind() == reflect.String
+	return getKind(value) == reflect.String
+}
+
+func getKind(value any) reflect.Kind {
+	return reflect.TypeOf(value).Kind()
 }
 
 func parseFeatureFile(data io.Reader) (*featureType, error) {
