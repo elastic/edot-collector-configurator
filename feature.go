@@ -27,10 +27,16 @@ func NewParams(sourceFilePath string, configurationNames []string) Params {
 type vars map[string]any
 type refs map[string]map[string]any
 
+type append struct {
+	Path    string
+	Content any
+}
+
 type configuration struct {
 	Content any `validate:"required"`
 	Vars    vars
 	Refs    refs
+	Append  append
 }
 
 type feature struct {

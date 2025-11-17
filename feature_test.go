@@ -122,7 +122,7 @@ configuration:
           assed_to_root: root value
       - path: "$.some_map"
         content:
-          assed_to_child_map: child map value with $vars.second
+          added_to_child_map: child map value with $vars.second
       - path: "$.some_list"
         content:
           - Thursday
@@ -252,7 +252,7 @@ func TestBuildFeature(t *testing.T) {
 					"second_placeholder": "config_second",
 					"some_map": map[string]any{
 						"first_key":          "first value",
-						"assed_to_child_map": "child map value with config_second",
+						"added_to_child_map": "child map value with config_second",
 					},
 					"some_list": []any{
 						"Monday",
