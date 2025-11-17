@@ -25,15 +25,18 @@ func NewParams(sourceFilePath string, configurationNames []string) Params {
 }
 
 type vars map[string]any
+type refs map[string]map[string]any
 
 type configuration struct {
-	Content map[string]any `validate:"required"`
+	Content any `validate:"required"`
 	Vars    vars
+	Refs    refs
 }
 
 type feature struct {
 	Configuration map[string]configuration `validate:"required"`
 	Vars          vars
+	Refs          refs
 }
 
 func BuildFeature(params Params) (map[string]any, error) {
@@ -51,7 +54,12 @@ func BuildFeature(params Params) (map[string]any, error) {
 		if !ok {
 			return nil, fmt.Errorf("couldn't find configuration named '%v'", key)
 		}
-		err := mergeMaps(body, configuration.Content)
+		configRefs := collectRefs(feature, configuration)
+		configContent, err := resolveConfigContent(configuration.Content, configRefs)
+		if err != nil {
+			return nil, err
+		}
+		err = mergeMaps(body, configContent)
 		if err != nil {
 			return nil, err
 		}
@@ -69,12 +77,76 @@ func BuildFeature(params Params) (map[string]any, error) {
 	}, nil
 }
 
+var refsPattern = regexp.MustCompile(`^\$refs\.[^\s]+$`)
+
+func resolveConfigContent(content any, configRefs refs) (map[string]any, error) {
+	if isMap(content) {
+		err := resolveMapRefs(content.(map[string]any), configRefs)
+		if err != nil {
+			return nil, err
+		}
+		return content.(map[string]any), nil
+	} else if isString(content) {
+		mapRef, err := resolveStringRef(content.(string), configRefs)
+		if err != nil {
+			return nil, err
+		}
+		err = resolveMapRefs(mapRef, configRefs)
+		if err != nil {
+			return nil, err
+		}
+		return mapRef, nil
+	}
+	return nil, fmt.Errorf("invalid content type, must be a map or a ref to a map. It's: %v", content)
+}
+
+func resolveMapRefs(content map[string]any, configRefs refs) error {
+	for k, v := range content {
+		if isString(v) && refsPattern.MatchString(v.(string)) {
+			mapRef, err := resolveStringRef(v.(string), configRefs)
+			if err != nil {
+				return err
+			}
+			err = resolveMapRefs(mapRef, configRefs)
+			if err != nil {
+				return err
+			}
+			content[k] = mapRef
+		}
+	}
+	return nil
+}
+
+func resolveStringRef(content string, configRefs refs) (map[string]any, error) {
+	refId := refsPattern.FindString(content)
+	if refId == "" {
+		return nil, fmt.Errorf("'%v' is not a valid ref", content)
+	}
+	ref, ok := configRefs[refId]
+	if !ok {
+		return nil, fmt.Errorf("'%s' is not defined", refId)
+	}
+	return ref, nil
+}
+
+func collectRefs(feature *feature, configuration configuration) refs {
+	collected := maps.Clone(feature.Refs)
+	maps.Copy(collected, configuration.Refs)
+
+	refPrefixedMap := make(refs, len(collected))
+	for k, v := range collected {
+		refPrefixedMap["$refs."+k] = v
+	}
+
+	return refPrefixedMap
+}
+
 func collectVars(feature *feature, configuration configuration, params Params) vars {
 	collected := maps.Clone(feature.Vars)
 	maps.Copy(collected, configuration.Vars)
 	maps.Copy(collected, params.Vars)
 
-	varPrefixedMap := make(map[string]any, len(collected))
+	varPrefixedMap := make(vars, len(collected))
 	for k, v := range collected {
 		varPrefixedMap["$vars."+k] = v
 	}

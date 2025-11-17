@@ -201,7 +201,7 @@ func TestBuildFeature(t *testing.T) {
 				"dummy": map[string]any{
 					"first_placeholder":  "global_first",
 					"second_placeholder": "config_second",
-					"some key":           "some value",
+					"some_key":           "some value",
 					"some_other_ref": map[string]any{
 						"config_key": "some config value",
 					},
