@@ -58,7 +58,10 @@ func BuildFeature(params Params) (map[string]any, error) {
 
 		configVars := collectVars(feature, configuration, params)
 
-		replaceVarsInMap(body, configVars)
+		err = replaceVarsInMap(body, configVars)
+		if err != nil {
+			return nil, err
+		}
 	}
 
 	return map[string]any{

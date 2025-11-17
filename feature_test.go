@@ -169,7 +169,7 @@ func TestBuildFeature(t *testing.T) {
 			input:                configurationWithMissingVars,
 			featureType:          "dummy",
 			configurations:       []string{"default"},
-			expectedErrorMessage: "'$vars.second' not found",
+			expectedErrorMessage: "'$vars.second' is not defined",
 			shouldFail:           true,
 		},
 	} {
