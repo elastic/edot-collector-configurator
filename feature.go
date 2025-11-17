@@ -36,7 +36,7 @@ type configurationType struct {
 	Content any `validate:"required"`
 	Vars    varsType
 	Refs    refsType
-	Append  appendType
+	Append  []appendType
 }
 
 type featureType struct {
