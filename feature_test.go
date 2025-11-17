@@ -284,3 +284,45 @@ func TestBuildFeature(t *testing.T) {
 		})
 	}
 }
+
+func TestYamlPathParsing(t *testing.T) {
+	for _, tc := range []struct {
+		testName             string
+		input                string
+		expectedOutput       []string
+		expectedErrorMessage string
+		shouldFail           bool
+	}{
+		{
+			testName:       "simple path",
+			input:          "$.one.path",
+			expectedOutput: []string{"one", "path"},
+		},
+		{
+			testName:       "root path",
+			input:          "$",
+			expectedOutput: []string{},
+		},
+		{
+			testName:       "path with dot",
+			input:          "$.some.path.'with.dot'.other",
+			expectedOutput: []string{"some", "path", "with.dot", "other"},
+		},
+		{
+			testName:             "invalid path",
+			input:                "$.",
+			expectedErrorMessage: "invalid yaml path: $.",
+			shouldFail:           true,
+		},
+	} {
+		t.Run(tc.testName, func(t *testing.T) {
+			items, err := parseYamlPath(tc.input)
+			if tc.shouldFail {
+				assert.EqualError(t, err, tc.expectedErrorMessage)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, tc.expectedOutput, items)
+			}
+		})
+	}
+}

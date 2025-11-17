@@ -27,7 +27,7 @@ func NewParams(sourceFilePath string, configurationNames []string) Params {
 type vars map[string]any
 type refs map[string]map[string]any
 
-type append struct {
+type appendItem struct {
 	Path    string
 	Content any
 }
@@ -36,7 +36,7 @@ type configuration struct {
 	Content any `validate:"required"`
 	Vars    vars
 	Refs    refs
-	Append  append
+	Append  appendItem
 }
 
 type feature struct {
@@ -281,4 +281,22 @@ func parseFeatureFile(data io.Reader) (*feature, error) {
 		return nil, err
 	}
 	return &result, nil
+}
+
+func parseYamlPath(path string) ([]string, error) {
+	yamlPathPattern := regexp.MustCompile(`^\$((?:\.[^\s.]+)+)?$`)
+	match := yamlPathPattern.FindAllStringSubmatch(path, -1)
+	if len(match) == 0 {
+		return nil, fmt.Errorf("invalid yaml path: %s", path)
+	}
+	subpath := match[0][1]
+	if subpath == "" {
+		return []string{}, nil
+	}
+	dotSeparatedPattern := regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
+	var items []string
+	for _, item := range dotSeparatedPattern.FindAllString(subpath, -1) {
+		items = append(items, strings.Trim(item, "'"))
+	}
+	return items, nil
 }
