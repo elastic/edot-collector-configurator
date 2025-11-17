@@ -159,23 +159,22 @@ func resolveVarsInString(value string, configVars vars) (any, error) {
 }
 
 func mergeMaps(dst map[string]any, src map[string]any) error {
-	var err error = nil
 	for k, v := range src {
 		dstVal, found := dst[k]
 		if found {
 			if isMap(v) {
-				err = mergeMaps(dstVal.(map[string]any), v.(map[string]any))
+				err := mergeMaps(dstVal.(map[string]any), v.(map[string]any))
+				if err != nil {
+					return err
+				}
 			} else {
-				err = fmt.Errorf("key overlap for '%v'", k)
+				return fmt.Errorf("key overlap for '%v'", k)
 			}
 		} else {
 			dst[k] = v
 		}
-		if err != nil {
-			break
-		}
 	}
-	return err
+	return nil
 }
 
 func isMap(value any) bool {
