@@ -69,6 +69,16 @@ configuration:
       third: config_third 
 `
 
+var configurationWithInvalidVars = `
+vars:
+  one: valid
+  two:
+    not_valid: true
+configuration:
+  default:
+    content: {}
+`
+
 var configurationWithMissingVars = `
 vars:
   first: global_first
@@ -216,6 +226,13 @@ func TestBuildFeature(t *testing.T) {
 					},
 				},
 			},
+		},
+		{
+			testName:             "invalid var format",
+			input:                configurationWithInvalidVars,
+			featureType:          "dummy",
+			expectedErrorMessage: "'$vars.two' format is not valid, only primitives are allowed",
+			shouldFail:           true,
 		},
 		{
 			testName:             "missing variable",

@@ -74,8 +74,10 @@ func BuildFeature(params Params) (map[string]any, error) {
 		if err != nil {
 			return nil, err
 		}
-
-		configVars := collectVars(feature, configuration, params)
+		configVars, err := collectVars(feature, configuration, params)
+		if err != nil {
+			return nil, err
+		}
 
 		err = replaceVarsInMap(body, configVars)
 		if err != nil {
@@ -220,17 +222,21 @@ func collectRefs(feature *featureType, configuration configurationType) refsType
 	return refPrefixedMap
 }
 
-func collectVars(feature *featureType, configuration configurationType, params Params) varsType {
+func collectVars(feature *featureType, configuration configurationType, params Params) (varsType, error) {
 	collected := maps.Clone(feature.Vars)
 	maps.Copy(collected, configuration.Vars)
 	maps.Copy(collected, params.Vars)
 
 	varPrefixedMap := make(varsType, len(collected))
 	for k, v := range collected {
-		varPrefixedMap["$vars."+k] = v
+		varName := "$vars." + k
+		if !isPrimitive(v) {
+			return nil, fmt.Errorf("'%s' format is not valid, only primitives are allowed", varName)
+		}
+		varPrefixedMap[varName] = v
 	}
 
-	return varPrefixedMap
+	return varPrefixedMap, nil
 }
 
 func replaceVarsInMap(body map[string]any, configVars varsType) error {
@@ -335,6 +341,21 @@ func isMap(value any) bool {
 func isList(value any) bool {
 	kind := getKind(value)
 	return kind == reflect.Slice || kind == reflect.Array
+}
+
+func isPrimitive(value any) bool {
+	kindName := getKind(value).String()
+	for _, primitiveName := range []string{
+		"string",
+		"bool",
+		"int",
+		"float",
+	} {
+		if strings.HasPrefix(kindName, primitiveName) {
+			return true
+		}
+	}
+	return false
 }
 
 func isString(value any) bool {
