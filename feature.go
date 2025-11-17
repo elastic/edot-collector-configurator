@@ -28,8 +28,8 @@ type varsType map[string]any
 type refsType map[string]map[string]any
 
 type appendType struct {
-	Path    string
-	Content any
+	Path    string `validate:"required"`
+	Content any    `validate:"required"`
 }
 
 type configurationType struct {
