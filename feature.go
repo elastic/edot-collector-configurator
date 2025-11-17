@@ -24,25 +24,25 @@ func NewParams(sourceFilePath string, configurationNames []string) Params {
 	panic("implement")
 }
 
-type vars map[string]any
-type refs map[string]map[string]any
+type varsType map[string]any
+type refsType map[string]map[string]any
 
-type appendItem struct {
+type appendType struct {
 	Path    string
 	Content any
 }
 
-type configuration struct {
+type configurationType struct {
 	Content any `validate:"required"`
-	Vars    vars
-	Refs    refs
-	Append  appendItem
+	Vars    varsType
+	Refs    refsType
+	Append  appendType
 }
 
-type feature struct {
-	Configuration map[string]configuration `validate:"required"`
-	Vars          vars
-	Refs          refs
+type featureType struct {
+	Configuration map[string]configurationType `validate:"required"`
+	Vars          varsType
+	Refs          refsType
 }
 
 func BuildFeature(params Params) (map[string]any, error) {
@@ -85,7 +85,7 @@ func BuildFeature(params Params) (map[string]any, error) {
 
 var refsPattern = regexp.MustCompile(`^\$refs\.[^\s]+$`)
 
-func resolveConfigContent(content any, configRefs refs) (map[string]any, error) {
+func resolveConfigContent(content any, configRefs refsType) (map[string]any, error) {
 	if isMap(content) {
 		err := resolveMapRefs(content.(map[string]any), configRefs)
 		if err != nil {
@@ -106,7 +106,7 @@ func resolveConfigContent(content any, configRefs refs) (map[string]any, error) 
 	return nil, fmt.Errorf("invalid content type, must be a map or a ref to a map. It's: %v", content)
 }
 
-func resolveMapRefs(content map[string]any, configRefs refs) error {
+func resolveMapRefs(content map[string]any, configRefs refsType) error {
 	for k, v := range content {
 		if isString(v) && refsPattern.MatchString(v.(string)) {
 			mapRef, err := resolveStringRef(v.(string), configRefs)
@@ -123,7 +123,7 @@ func resolveMapRefs(content map[string]any, configRefs refs) error {
 	return nil
 }
 
-func resolveStringRef(content string, configRefs refs) (map[string]any, error) {
+func resolveStringRef(content string, configRefs refsType) (map[string]any, error) {
 	refId := refsPattern.FindString(content)
 	if refId == "" {
 		return nil, fmt.Errorf("'%v' is not a valid ref", content)
@@ -135,11 +135,11 @@ func resolveStringRef(content string, configRefs refs) (map[string]any, error) {
 	return ref, nil
 }
 
-func collectRefs(feature *feature, configuration configuration) refs {
+func collectRefs(feature *featureType, configuration configurationType) refsType {
 	collected := maps.Clone(feature.Refs)
 	maps.Copy(collected, configuration.Refs)
 
-	refPrefixedMap := make(refs, len(collected))
+	refPrefixedMap := make(refsType, len(collected))
 	for k, v := range collected {
 		refPrefixedMap["$refs."+k] = v
 	}
@@ -147,12 +147,12 @@ func collectRefs(feature *feature, configuration configuration) refs {
 	return refPrefixedMap
 }
 
-func collectVars(feature *feature, configuration configuration, params Params) vars {
+func collectVars(feature *featureType, configuration configurationType, params Params) varsType {
 	collected := maps.Clone(feature.Vars)
 	maps.Copy(collected, configuration.Vars)
 	maps.Copy(collected, params.Vars)
 
-	varPrefixedMap := make(vars, len(collected))
+	varPrefixedMap := make(varsType, len(collected))
 	for k, v := range collected {
 		varPrefixedMap["$vars."+k] = v
 	}
@@ -160,7 +160,7 @@ func collectVars(feature *feature, configuration configuration, params Params) v
 	return varPrefixedMap
 }
 
-func replaceVarsInMap(body map[string]any, configVars vars) error {
+func replaceVarsInMap(body map[string]any, configVars varsType) error {
 	for k, v := range body {
 		if isMap(v) {
 			err := replaceVarsInMap(v.(map[string]any), configVars)
@@ -184,7 +184,7 @@ func replaceVarsInMap(body map[string]any, configVars vars) error {
 	return nil
 }
 
-func replaceVarsInList(list []any, configVars vars) ([]any, error) {
+func replaceVarsInList(list []any, configVars varsType) ([]any, error) {
 	resolvedList := make([]any, len(list))
 	for i, v := range list {
 		if isMap(v) {
@@ -206,7 +206,7 @@ func replaceVarsInList(list []any, configVars vars) ([]any, error) {
 	return resolvedList, nil
 }
 
-func resolveVarsInString(value string, configVars vars) (any, error) {
+func resolveVarsInString(value string, configVars varsType) (any, error) {
 	varsPatternStr := `\$vars\.[^\s]+`
 	varPattern := regexp.MustCompile(varsPatternStr)
 	fullStringVarPattern := regexp.MustCompile(fmt.Sprintf("^%s$", varsPatternStr))
@@ -268,9 +268,9 @@ func isString(value any) bool {
 	return reflect.TypeOf(value).Kind() == reflect.String
 }
 
-func parseFeatureFile(data io.Reader) (*feature, error) {
+func parseFeatureFile(data io.Reader) (*featureType, error) {
 	validate := validator.New()
-	result := feature{}
+	result := featureType{}
 	dec := yaml.NewDecoder(
 		data,
 		yaml.Validator(validate),
