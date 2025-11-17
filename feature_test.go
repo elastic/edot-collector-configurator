@@ -99,6 +99,39 @@ configuration:
       second: config_second
 `
 
+var appendingToConfiguration = `
+vars:
+  first: global_first
+  second: global_second
+refs:
+  base:
+    first_placeholder: $vars.first
+    second_placeholder: $vars.second
+    some_map:
+      first_key: first value
+    some_list:
+      - Monday
+      - Tuesday
+      - Wednesday
+configuration:
+  default:
+    content: $refs.base
+    append:
+      - path: "$"
+        content:
+          assed_to_root: root value
+      - path: "$.some_map"
+        content:
+          assed_to_child_map: child map value with $vars.second
+      - path: "$.some_list"
+        content:
+          - Thursday
+          - Friday
+          - $vars.first
+    vars:
+      second: config_second
+`
+
 func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
 		testName             string
@@ -205,6 +238,31 @@ func TestBuildFeature(t *testing.T) {
 					"some_other_ref": map[string]any{
 						"config_key": "some config value",
 					},
+				},
+			},
+		},
+		{
+			testName:       "appending to config",
+			input:          appendingToConfiguration,
+			featureType:    "dummy",
+			configurations: []string{"default"},
+			expectedResult: map[string]any{
+				"dummy": map[string]any{
+					"first_placeholder":  "golbal_first",
+					"second_placeholder": "config_second",
+					"some_map": map[string]any{
+						"first_key":          "first value",
+						"assed_to_child_map": "child map value with config_second",
+					},
+					"some_list": []any{
+						"Monday",
+						"Tuesday",
+						"Wednesday",
+						"Thrusday",
+						"Friday",
+						"global_first",
+					},
+					"assed_to_root": "root value",
 				},
 			},
 		},
