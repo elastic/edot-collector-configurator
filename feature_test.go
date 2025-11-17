@@ -69,6 +69,16 @@ configuration:
       third: config_third 
 `
 
+var configurationWithMissingVars = `
+vars:
+  first: global_first
+configuration:
+  default:
+    content:
+      first_placeholder: $vars.first
+      second_placeholder: $vars.second
+`
+
 func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
 		testName             string
@@ -153,6 +163,14 @@ func TestBuildFeature(t *testing.T) {
 					},
 				},
 			},
+		},
+		{
+			testName:             "missing variable",
+			input:                configurationWithMissingVars,
+			featureType:          "dummy",
+			configurations:       []string{"default"},
+			expectedErrorMessage: "'$vars.second' not found",
+			shouldFail:           true,
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
