@@ -79,6 +79,26 @@ configuration:
       second_placeholder: $vars.second
 `
 
+var configurationWithRefs = `
+vars:
+  first: global_first
+  second: global_second
+refs:
+  base:
+    first_placeholder: $vars.first
+    second_placeholder: $vars.second
+    some_key: some value
+    some_other_ref: $refs.config_details
+configuration:
+  default:
+    content: $refs.base
+    refs:
+      config_details:
+        config_key: some config value
+    vars:
+      second: config_second
+`
+
 func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
 		testName             string
@@ -171,6 +191,22 @@ func TestBuildFeature(t *testing.T) {
 			configurations:       []string{"default"},
 			expectedErrorMessage: "'$vars.second' is not defined",
 			shouldFail:           true,
+		},
+		{
+			testName:       "config with refs",
+			input:          configurationWithRefs,
+			featureType:    "dummy",
+			configurations: []string{"default"},
+			expectedResult: map[string]any{
+				"dummy": map[string]any{
+					"first_placeholder":  "global_first",
+					"second_placeholder": "config_second",
+					"some key":           "some value",
+					"some_other_ref": map[string]any{
+						"config_key": "some config value",
+					},
+				},
+			},
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
