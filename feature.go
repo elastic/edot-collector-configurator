@@ -45,6 +45,17 @@ type featureType struct {
 	Refs          refsType
 }
 
+const varsPatternStr = `\$vars\.[^\s]+`
+
+var (
+	refsPattern = regexp.MustCompile(`^\$refs\.[^\s]+$`)
+
+	varPattern           = regexp.MustCompile(varsPatternStr)
+	fullStringVarPattern = regexp.MustCompile(fmt.Sprintf("^%s$", varsPatternStr))
+	yamlPathPattern      = regexp.MustCompile(`^\$((?:\.[^\s.]+)+)?$`)
+	dotSeparatedPattern  = regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
+)
+
 func BuildFeature(params Params) (map[string]any, error) {
 	var err error
 	feature, err := parseFeatureFile(params.SourceFileReader)
@@ -157,8 +168,6 @@ func appendListItems(body map[string]any, path []string, content []any) error {
 
 	return nil
 }
-
-var refsPattern = regexp.MustCompile(`^\$refs\.[^\s]+$`)
 
 func resolveConfigContent(content any, configRefs refsType) (map[string]any, error) {
 	if isMap(content) {
@@ -286,10 +295,6 @@ func replaceVarsInList(list []any, configVars varsType) ([]any, error) {
 }
 
 func resolveVarsInString(value string, configVars varsType) (any, error) {
-	varsPatternStr := `\$vars\.[^\s]+`
-	varPattern := regexp.MustCompile(varsPatternStr)
-	fullStringVarPattern := regexp.MustCompile(fmt.Sprintf("^%s$", varsPatternStr))
-
 	if fullStringVarPattern.MatchString(value) {
 		varValue, ok := configVars[value]
 		if ok {
@@ -382,7 +387,6 @@ func parseFeatureFile(data io.Reader) (*featureType, error) {
 }
 
 func parseYamlPath(path string) ([]string, error) {
-	yamlPathPattern := regexp.MustCompile(`^\$((?:\.[^\s.]+)+)?$`)
 	match := yamlPathPattern.FindAllStringSubmatch(path, -1)
 	if len(match) == 0 {
 		return nil, fmt.Errorf("invalid yaml path: %s", path)
@@ -391,7 +395,6 @@ func parseYamlPath(path string) ([]string, error) {
 	if subpath == "" {
 		return []string{}, nil
 	}
-	dotSeparatedPattern := regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
 	var items []string
 	for _, item := range dotSeparatedPattern.FindAllString(subpath, -1) {
 		items = append(items, strings.Trim(item, "'"))
