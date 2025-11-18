@@ -46,7 +46,7 @@ const varsPatternStr = `\$vars\.[^\s]+`
 
 var (
 	refsPattern          = regexp.MustCompile(`^\$refs\.[^\s]+$`)
-	varPattern           = regexp.MustCompile(varsPatternStr)
+	varsPattern          = regexp.MustCompile(varsPatternStr)
 	fullStringVarPattern = regexp.MustCompile(fmt.Sprintf("^%s$", varsPatternStr))
 	yamlPathPattern      = regexp.MustCompile(`^\$((?:\.[^\s.]+)+)?$`)
 	dotSeparatedPattern  = regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
@@ -312,8 +312,8 @@ func resolveVarsInString(value string, configVars varsType) (any, error) {
 		} else {
 			return nil, fmt.Errorf("'%s' is not defined", value)
 		}
-	} else if varPattern.MatchString(value) {
-		matches := varPattern.FindAllString(value, -1)
+	} else if varsPattern.MatchString(value) {
+		matches := varsPattern.FindAllString(value, -1)
 		if len(matches) > 0 {
 			newValue := value
 			for _, v := range slices.Compact(matches) {
