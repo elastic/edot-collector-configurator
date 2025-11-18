@@ -38,7 +38,7 @@ const:
 features:
   my-exporter:
     source: testpath/dummy.yml
-	name: custom-name
+    name: custom-name
     vars:
       endpoint: $args.endpoint
       api_key: $args.api_key

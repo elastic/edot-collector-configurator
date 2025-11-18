@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io"
 )
 
@@ -28,5 +27,13 @@ type recipeType struct {
 }
 
 func buildRecipe(source io.Reader, params RecipeParams) ([]byte, error) {
-	return nil, fmt.Errorf("unknown error")
+	var err error
+	var result []byte
+	recipe := &recipeType{}
+	err = parseYamlFile(source, recipe)
+	if err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }
