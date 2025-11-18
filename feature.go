@@ -18,7 +18,6 @@ type FetureParams struct {
 	Vars               map[string]any
 }
 
-type varsType map[string]any
 type refsType map[string]map[string]any
 
 type appendType struct {

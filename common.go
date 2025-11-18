@@ -7,6 +7,8 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
+type varsType map[string]any
+
 func parseYamlFile(data io.Reader, result any) error {
 	validate := validator.New()
 	dec := yaml.NewDecoder(
