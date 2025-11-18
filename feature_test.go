@@ -299,7 +299,7 @@ func TestBuildFeature(t *testing.T) {
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
-			result, err := buildFeature(strings.NewReader(tc.input), Params{
+			result, err := buildFeature(strings.NewReader(tc.input), FetureParams{
 				Type:               tc.featureType,
 				Name:               tc.customName,
 				ConfigurationNames: tc.configurations,

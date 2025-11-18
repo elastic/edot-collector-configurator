@@ -14,7 +14,7 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-type Params struct {
+type FetureParams struct {
 	Type               string
 	Name               string
 	ConfigurationNames []string
@@ -52,7 +52,7 @@ var (
 	dotSeparatedPattern  = regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
 )
 
-func BuildFeature(sourceFilePath string, params Params) (map[string]any, error) {
+func BuildFeature(sourceFilePath string, params FetureParams) (map[string]any, error) {
 	f, err := os.Open(sourceFilePath)
 	if err != nil {
 		return nil, err
@@ -62,7 +62,7 @@ func BuildFeature(sourceFilePath string, params Params) (map[string]any, error) 
 	return buildFeature(f, params)
 }
 
-func buildFeature(source io.Reader, params Params) (map[string]any, error) {
+func buildFeature(source io.Reader, params FetureParams) (map[string]any, error) {
 	var err error
 	feature, err := parseFeatureFile(source)
 	if err != nil {
@@ -241,7 +241,7 @@ func collectRefs(feature *featureType, configuration configurationType) refsType
 	return refPrefixedMap
 }
 
-func collectVars(feature *featureType, configuration configurationType, params Params) (varsType, error) {
+func collectVars(feature *featureType, configuration configurationType, params FetureParams) (varsType, error) {
 	collected := maps.Clone(feature.Vars)
 	maps.Copy(collected, configuration.Vars)
 	maps.Copy(collected, params.Vars)
