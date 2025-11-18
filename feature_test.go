@@ -146,8 +146,7 @@ func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
 		testName             string
 		input                string
-		customName           string
-		featureType          string
+		featureName          string
 		configurations       []string
 		vars                 map[string]any
 		expectedResult       map[string]any
@@ -157,7 +156,7 @@ func TestBuildFeature(t *testing.T) {
 		{
 			testName:       "select configuration",
 			input:          simpleConfiguration,
-			featureType:    "elasticsearch",
+			featureName:    "elasticsearch",
 			configurations: []string{"someconfig"},
 			expectedResult: map[string]any{
 				"elasticsearch": map[string]any{
@@ -169,7 +168,7 @@ func TestBuildFeature(t *testing.T) {
 		{
 			testName:       "using default config when none provided",
 			input:          simpleConfiguration,
-			featureType:    "elasticsearch",
+			featureName:    "elasticsearch",
 			configurations: []string{},
 			expectedResult: map[string]any{
 				"elasticsearch": map[string]any{
@@ -181,8 +180,7 @@ func TestBuildFeature(t *testing.T) {
 		{
 			testName:       "defining custom config key name",
 			input:          simpleConfiguration,
-			featureType:    "elasticsearch",
-			customName:     "my_name",
+			featureName:    "elasticsearch/my_name",
 			configurations: []string{},
 			expectedResult: map[string]any{
 				"elasticsearch/my_name": map[string]any{
@@ -194,7 +192,7 @@ func TestBuildFeature(t *testing.T) {
 		{
 			testName:       "merging configurations",
 			input:          mergeableConfiguration,
-			featureType:    "otlp",
+			featureName:    "otlp",
 			configurations: []string{"http", "grpc"},
 			expectedResult: map[string]any{
 				"otlp": map[string]any{
@@ -212,7 +210,7 @@ func TestBuildFeature(t *testing.T) {
 		{
 			testName:             "fail merging configurations",
 			input:                unmergeableConfiguration,
-			featureType:          "otlp",
+			featureName:          "otlp",
 			configurations:       []string{"first", "second"},
 			shouldFail:           true,
 			expectedErrorMessage: "key overlap for 'endpoint'",
@@ -220,7 +218,7 @@ func TestBuildFeature(t *testing.T) {
 		{
 			testName:       "variables overriding",
 			input:          configurationWithVars,
-			featureType:    "dummy",
+			featureName:    "dummy",
 			configurations: []string{"default"},
 			vars: map[string]any{
 				"third":  "external_third",
@@ -244,14 +242,14 @@ func TestBuildFeature(t *testing.T) {
 		{
 			testName:             "invalid var format",
 			input:                configurationWithInvalidVars,
-			featureType:          "dummy",
+			featureName:          "dummy",
 			expectedErrorMessage: "'$vars.two' format is not valid, only primitives are allowed",
 			shouldFail:           true,
 		},
 		{
 			testName:             "missing variable",
 			input:                configurationWithMissingVars,
-			featureType:          "dummy",
+			featureName:          "dummy",
 			configurations:       []string{"default"},
 			expectedErrorMessage: "'$vars.second' is not defined",
 			shouldFail:           true,
@@ -259,7 +257,7 @@ func TestBuildFeature(t *testing.T) {
 		{
 			testName:       "config with refs",
 			input:          configurationWithRefs,
-			featureType:    "dummy",
+			featureName:    "dummy",
 			configurations: []string{"default"},
 			expectedResult: map[string]any{
 				"dummy": map[string]any{
@@ -275,7 +273,7 @@ func TestBuildFeature(t *testing.T) {
 		{
 			testName:       "appending to config",
 			input:          appendingToConfiguration,
-			featureType:    "dummy",
+			featureName:    "dummy",
 			configurations: []string{"default"},
 			expectedResult: map[string]any{
 				"dummy": map[string]any{
@@ -299,9 +297,8 @@ func TestBuildFeature(t *testing.T) {
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
-			result, err := buildFeature(strings.NewReader(tc.input), FetureParams{
-				Type:               tc.featureType,
-				Name:               tc.customName,
+			result, err := BuildFeature(strings.NewReader(tc.input), FetureParams{
+				Name:               tc.featureName,
 				ConfigurationNames: tc.configurations,
 				Vars:               tc.vars,
 			})

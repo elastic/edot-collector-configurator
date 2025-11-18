@@ -40,7 +40,7 @@ features:
     source: testpath/dummy.yml
     name: custom-name
     vars:
-      endpoint: $args.endpoint
+      endpoint: $const.a_global_var
       api_key: $args.api_key
   my-other-exporter:
     source: testpath/dummy.yml
@@ -65,7 +65,7 @@ const (
 var expectedBuiltRecipe = `
 testpath:
   dummy/custom-name:
-    es_endpoint: http://external.endpoint
+    es_endpoint: http://recipe.global.endpoint
     es_api_key: external_api_key
   dummy:
     es_endpoint: http://external.endpoint

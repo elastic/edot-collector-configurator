@@ -4,15 +4,11 @@ import (
 	"fmt"
 	"io"
 	"maps"
-	"os"
-	"reflect"
 	"regexp"
-	"slices"
 	"strings"
 )
 
 type FetureParams struct {
-	Type               string
 	Name               string
 	ConfigurationNames []string
 	Vars               map[string]any
@@ -38,28 +34,17 @@ type featureType struct {
 	Refs          refsType
 }
 
-const varsPatternStr = `\$vars\.[^\s]+`
-
 var (
-	refsPattern          = regexp.MustCompile(`^\$refs\.[^\s]+$`)
-	varsPattern          = regexp.MustCompile(varsPatternStr)
-	fullStringVarPattern = regexp.MustCompile(fmt.Sprintf("^%s$", varsPatternStr))
-	yamlPathPattern      = regexp.MustCompile(`^\$((?:\.[^\s.]+)+)?$`)
-	dotSeparatedPattern  = regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
+	refsPattern         = regexp.MustCompile(`^\$refs\.[^\s]+$`)
+	yamlPathPattern     = regexp.MustCompile(`^\$((?:\.[^\s.]+)+)?$`)
+	dotSeparatedPattern = regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
 )
 
-func BuildFeature(sourceFilePath string, params FetureParams) (map[string]any, error) {
-	f, err := os.Open(sourceFilePath)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
-	return buildFeature(f, params)
-}
-
-func buildFeature(source io.Reader, params FetureParams) (map[string]any, error) {
+func BuildFeature(source io.Reader, params FetureParams) (map[string]any, error) {
 	var err error
+	if params.Name == "" {
+		return nil, fmt.Errorf("name param not set")
+	}
 	feature := &featureType{}
 	err = parseYamlFile(source, feature)
 	if err != nil {
@@ -99,12 +84,8 @@ func buildFeature(source io.Reader, params FetureParams) (map[string]any, error)
 		}
 	}
 
-	featureName := params.Type
-	if len(params.Name) > 0 {
-		featureName = fmt.Sprintf("%s/%s", featureName, params.Name)
-	}
 	return map[string]any{
-		featureName: body,
+		params.Name: body,
 	}, nil
 }
 
@@ -242,17 +223,7 @@ func collectVars(feature *featureType, configuration configurationType, params F
 	collected := maps.Clone(feature.Vars)
 	maps.Copy(collected, configuration.Vars)
 	maps.Copy(collected, params.Vars)
-
-	varPrefixedMap := make(varsType, len(collected))
-	for k, v := range collected {
-		varName := "$vars." + k
-		if !isPrimitive(v) {
-			return nil, fmt.Errorf("'%s' format is not valid, only primitives are allowed", varName)
-		}
-		varPrefixedMap[varName] = v
-	}
-
-	return varPrefixedMap, nil
+	return prependToKeysOfPrimitiveValues(collected, "$vars.")
 }
 
 func replaceVarsInMap(body map[string]any, configVars varsType) error {
@@ -269,7 +240,7 @@ func replaceVarsInMap(body map[string]any, configVars varsType) error {
 			}
 			body[k] = list
 		} else if isString(v) {
-			resolvedValue, err := resolveVarsInString(v.(string), configVars)
+			resolvedValue, err := resolvePlaceholdersInString(v.(string), *varsPattern, configVars)
 			if err != nil {
 				return err
 			}
@@ -289,7 +260,7 @@ func replaceVarsInList(list []any, configVars varsType) ([]any, error) {
 			}
 			resolvedList[i] = v
 		} else if isString(v) {
-			resolvedValue, err := resolveVarsInString(v.(string), configVars)
+			resolvedValue, err := resolvePlaceholdersInString(v.(string), *varsPattern, configVars)
 			if err != nil {
 				return nil, err
 			}
@@ -299,83 +270,6 @@ func replaceVarsInList(list []any, configVars varsType) ([]any, error) {
 		}
 	}
 	return resolvedList, nil
-}
-
-func resolveVarsInString(value string, configVars varsType) (any, error) {
-	if fullStringVarPattern.MatchString(value) {
-		varValue, ok := configVars[value]
-		if ok {
-			return varValue, nil
-		} else {
-			return nil, fmt.Errorf("'%s' is not defined", value)
-		}
-	} else if varsPattern.MatchString(value) {
-		matches := varsPattern.FindAllString(value, -1)
-		if len(matches) > 0 {
-			newValue := value
-			for _, v := range slices.Compact(matches) {
-				varValue, ok := configVars[v].(string)
-				if ok {
-					newValue = strings.ReplaceAll(newValue, v, varValue)
-				} else {
-					return nil, fmt.Errorf("'%s' is not defined", v)
-				}
-			}
-			return newValue, nil
-		}
-	}
-	return value, nil
-}
-
-func mergeMaps(dst map[string]any, src map[string]any) error {
-	for k, v := range src {
-		dstVal, found := dst[k]
-		if found {
-			if isMap(v) {
-				err := mergeMaps(dstVal.(map[string]any), v.(map[string]any))
-				if err != nil {
-					return err
-				}
-			} else {
-				return fmt.Errorf("key overlap for '%v'", k)
-			}
-		} else {
-			dst[k] = v
-		}
-	}
-	return nil
-}
-
-func isMap(value any) bool {
-	return getKind(value) == reflect.Map
-}
-
-func isList(value any) bool {
-	kind := getKind(value)
-	return kind == reflect.Slice || kind == reflect.Array
-}
-
-func isPrimitive(value any) bool {
-	kindName := getKind(value).String()
-	for _, primitiveName := range []string{
-		"string",
-		"bool",
-		"int",
-		"float",
-	} {
-		if strings.HasPrefix(kindName, primitiveName) {
-			return true
-		}
-	}
-	return false
-}
-
-func isString(value any) bool {
-	return getKind(value) == reflect.String
-}
-
-func getKind(value any) reflect.Kind {
-	return reflect.TypeOf(value).Kind()
 }
 
 func parseYamlPath(path string) ([]string, error) {
