@@ -56,10 +56,7 @@ func buildRecipe(source io.Reader, params RecipeParams) ([]byte, error) {
 	}
 	builtFeatures := make(map[string]any)
 	for k, v := range recipe.Features {
-		featureFilePath, err := resolveFeatureFilePath(params, v)
-		if err != nil {
-			return nil, err
-		}
+		featureFilePath := filepath.Join(params.FeaturesDirPath, v.Source)
 		feature, err := buildFeature(featureNames[k], featureFilePath, v, allArguments)
 		if err != nil {
 			return nil, err
@@ -130,18 +127,6 @@ func resolveVars(varsType varsType, arguments map[string]any) (map[string]any, e
 	return result, nil
 }
 
-func resolveFeatureFilePath(params RecipeParams, featureDef featureDefType) (string, error) {
-	dirPath, err := filepath.Localize(params.FeaturesDirPath)
-	if err != nil {
-		return "", err
-	}
-	relativePath, err := filepath.Localize(featureDef.Source)
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(dirPath, relativePath), nil
-}
-
 func getFeatureNames(recipe *recipeType) (map[string]string, error) {
 	featureNames := make(map[string]string)
 	for k, v := range recipe.Features {
@@ -165,14 +150,14 @@ func getConstantsRefs(provided map[string]any) (map[string]any, error) {
 
 func getArgsRefs(argsDef map[string]argsDefType, providedArgs map[string]string) (map[string]string, error) {
 	collected := maps.Clone(providedArgs)
-	var err error
 	for k, v := range argsDef {
 		_, ok := collected[k]
 		if !ok {
-			collected[k], err = getEnvVar(v.Env)
+			envVarValue, err := getEnvVar(v.Env)
 			if err != nil {
 				return nil, err
 			}
+			collected[k] = envVarValue
 		}
 	}
 	return prependToKeysOfPrimitiveValues(collected, "$args.")

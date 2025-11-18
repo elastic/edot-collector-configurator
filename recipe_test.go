@@ -22,10 +22,10 @@ configuration:
     content: $refs.base
   someconfig:
     content: $refs.base
-  append:
-    - path: "$"
-      content:
-        extra_key: $vars.some_var
+    append:
+      - path: "$"
+        content:
+          extra_key: $vars.some_var
 `
 var dummyRecipe = `
 args:
@@ -82,6 +82,10 @@ services:
 func TestBuildRecipe(t *testing.T) {
 	featuresTempDir, err := os.MkdirTemp("", "features")
 	assert.NoError(t, err)
+	os.Setenv("ELASTICSEARCH_ENDPOINT", "http://endpoint.from.env")
+	os.Setenv("ELASTICSEARCH_API_KEY", providedApiKey)
+	defer os.Unsetenv("ELASTICSEARCH_ENDPOINT")
+	defer os.Unsetenv("ELASTICSEARCH_API_KEY")
 	defer os.RemoveAll(featuresTempDir)
 
 	testDirPath := filepath.Join(featuresTempDir, "testpath")
@@ -93,8 +97,10 @@ func TestBuildRecipe(t *testing.T) {
 
 	data, err := buildRecipe(strings.NewReader(dummyRecipe), RecipeParams{
 		FeaturesDirPath: featuresTempDir,
+		Args: map[string]string{
+			"endpoint": providedEndpoint,
+		},
 	})
 	assert.NoError(t, err)
-
 	assert.Equal(t, expectedBuiltRecipe, string(data[:]))
 }
