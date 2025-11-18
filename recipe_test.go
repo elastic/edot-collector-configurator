@@ -44,7 +44,7 @@ features:
       api_key: $args.api_key
   my-other-exporter:
     source: testpath/dummy.yml
-    configurations: [ someconfig ]
+    configurations: [someconfig]
     vars:
       endpoint: $args.endpoint
       api_key: my-other-exporter-key

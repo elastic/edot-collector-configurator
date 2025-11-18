@@ -9,9 +9,6 @@ import (
 	"regexp"
 	"slices"
 	"strings"
-
-	"github.com/go-playground/validator/v10"
-	"github.com/goccy/go-yaml"
 )
 
 type FetureParams struct {
@@ -64,7 +61,8 @@ func BuildFeature(sourceFilePath string, params FetureParams) (map[string]any, e
 
 func buildFeature(source io.Reader, params FetureParams) (map[string]any, error) {
 	var err error
-	feature, err := parseFeatureFile(source)
+	feature := &featureType{}
+	err = parseYamlFile(source, feature)
 	if err != nil {
 		return nil, err
 	}
@@ -379,21 +377,6 @@ func isString(value any) bool {
 
 func getKind(value any) reflect.Kind {
 	return reflect.TypeOf(value).Kind()
-}
-
-func parseFeatureFile(data io.Reader) (*featureType, error) {
-	validate := validator.New()
-	result := featureType{}
-	dec := yaml.NewDecoder(
-		data,
-		yaml.Validator(validate),
-		yaml.Strict(),
-	)
-	err := dec.Decode(&result)
-	if err != nil {
-		return nil, err
-	}
-	return &result, nil
 }
 
 func parseYamlPath(path string) ([]string, error) {
