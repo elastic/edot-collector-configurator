@@ -35,6 +35,7 @@ type featureType struct {
 }
 
 var (
+	varsPattern         = regexp.MustCompile(`\$vars\.[^\s]+`)
 	refsPattern         = regexp.MustCompile(`^\$refs\.[^\s]+$`)
 	yamlPathPattern     = regexp.MustCompile(`^\$((?:\.[^\s.]+)+)?$`)
 	dotSeparatedPattern = regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
@@ -78,7 +79,7 @@ func BuildFeature(source io.Reader, params FetureParams) (map[string]any, error)
 			return nil, err
 		}
 
-		err = replaceVarsInMap(body, configVars)
+		err = replacePlaceholdersInMap(body, *varsPattern, configVars)
 		if err != nil {
 			return nil, err
 		}
@@ -224,52 +225,6 @@ func collectVars(feature *featureType, configuration configurationType, params F
 	maps.Copy(collected, configuration.Vars)
 	maps.Copy(collected, params.Vars)
 	return prependToKeysOfPrimitiveValues(collected, "$vars.")
-}
-
-func replaceVarsInMap(body map[string]any, configVars varsType) error {
-	for k, v := range body {
-		if isMap(v) {
-			err := replaceVarsInMap(v.(map[string]any), configVars)
-			if err != nil {
-				return err
-			}
-		} else if isList(v) {
-			list, err := replaceVarsInList(v.([]any), configVars)
-			if err != nil {
-				return err
-			}
-			body[k] = list
-		} else if isString(v) {
-			resolvedValue, err := resolvePlaceholdersInString(v.(string), *varsPattern, configVars)
-			if err != nil {
-				return err
-			}
-			body[k] = resolvedValue
-		}
-	}
-	return nil
-}
-
-func replaceVarsInList(list []any, configVars varsType) ([]any, error) {
-	resolvedList := make([]any, len(list))
-	for i, v := range list {
-		if isMap(v) {
-			err := replaceVarsInMap(v.(map[string]any), configVars)
-			if err != nil {
-				return nil, err
-			}
-			resolvedList[i] = v
-		} else if isString(v) {
-			resolvedValue, err := resolvePlaceholdersInString(v.(string), *varsPattern, configVars)
-			if err != nil {
-				return nil, err
-			}
-			resolvedList[i] = resolvedValue
-		} else {
-			resolvedList[i] = v
-		}
-	}
-	return resolvedList, nil
 }
 
 func parseYamlPath(path string) ([]string, error) {

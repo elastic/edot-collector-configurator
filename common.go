@@ -12,10 +12,6 @@ import (
 	"github.com/goccy/go-yaml"
 )
 
-var (
-	varsPattern = regexp.MustCompile(`\$vars\.[^\s]+`)
-)
-
 type varsType map[string]any
 
 func isPrimitive(value any) bool {
@@ -67,6 +63,52 @@ func mergeMaps(dst map[string]any, src map[string]any) error {
 		}
 	}
 	return nil
+}
+
+func replacePlaceholdersInMap(target map[string]any, placeholderPattern regexp.Regexp, values map[string]any) error {
+	for k, v := range target {
+		if isMap(v) {
+			err := replacePlaceholdersInMap(v.(map[string]any), placeholderPattern, values)
+			if err != nil {
+				return err
+			}
+		} else if isList(v) {
+			list, err := replacePlaceholdersInList(v.([]any), placeholderPattern, values)
+			if err != nil {
+				return err
+			}
+			target[k] = list
+		} else if isString(v) {
+			resolvedValue, err := resolvePlaceholdersInString(v.(string), placeholderPattern, values)
+			if err != nil {
+				return err
+			}
+			target[k] = resolvedValue
+		}
+	}
+	return nil
+}
+
+func replacePlaceholdersInList(list []any, placeholderPattern regexp.Regexp, values map[string]any) ([]any, error) {
+	resolvedList := make([]any, len(list))
+	for i, v := range list {
+		if isMap(v) {
+			err := replacePlaceholdersInMap(v.(map[string]any), placeholderPattern, values)
+			if err != nil {
+				return nil, err
+			}
+			resolvedList[i] = v
+		} else if isString(v) {
+			resolvedValue, err := resolvePlaceholdersInString(v.(string), placeholderPattern, values)
+			if err != nil {
+				return nil, err
+			}
+			resolvedList[i] = resolvedValue
+		} else {
+			resolvedList[i] = v
+		}
+	}
+	return resolvedList, nil
 }
 
 func resolvePlaceholdersInString(target string, placeholderPattern regexp.Regexp, values map[string]any) (any, error) {
