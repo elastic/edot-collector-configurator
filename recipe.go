@@ -7,8 +7,6 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
-
-	"github.com/goccy/go-yaml"
 )
 
 var (
@@ -39,7 +37,7 @@ type recipeType struct {
 	Const    map[string]any
 }
 
-func buildRecipe(source io.Reader, params RecipeParams) ([]byte, error) {
+func BuildRecipe(source io.Reader, params RecipeParams) (map[string]any, error) {
 	var err error
 	recipe := &recipeType{}
 	err = parseYamlFile(source, recipe)
@@ -66,8 +64,16 @@ func buildRecipe(source io.Reader, params RecipeParams) ([]byte, error) {
 			componentName: feature,
 		})
 	}
+	resolvedServices := maps.Clone(recipe.Services)
+	err = replacePlaceholdersInMap(resolvedServices, *anyArgPattern, allArguments)
+	if err != nil {
+		return nil, err
+	}
+	mergeMaps(builtFeatures, map[string]any{
+		"services": resolvedServices,
+	})
 
-	return yaml.Marshal(builtFeatures)
+	return builtFeatures, nil
 }
 
 func buildFeature(featureName string, featureFilePath string, featureDef featureDefType, arguments map[string]any) (map[string]any, error) {

@@ -37,13 +37,13 @@ const:
   a_global_var: http://recipe.global.endpoint
 features:
   my-exporter:
-    source: testpath/dummy.yml
+    source: dummypath/dummy.yml
     name: custom-name
     vars:
       endpoint: $const.a_global_var
       api_key: $args.api_key
   my-other-exporter:
-    source: testpath/dummy.yml
+    source: dummypath/dummy.yml
     configurations: [someconfig]
     vars:
       endpoint: $args.endpoint
@@ -62,23 +62,6 @@ const (
 	providedApiKey   = "external_api_key"
 )
 
-var expectedBuiltRecipe = `
-testpath:
-  dummy:
-    es_api_key: my-other-exporter-key
-    es_endpoint: http://external.endpoint
-    extra_key: other-extra-value
-  dummy/custom-name:
-    es_api_key: external_api_key
-    es_endpoint: http://recipe.global.endpoint
-services:
-  pipelines:
-    traces:
-      exporters: [dummy/custom-name]
-    traces/something:
-      exporters: [dummy]
-`
-
 func TestBuildRecipe(t *testing.T) {
 	featuresTempDir, err := os.MkdirTemp("", "features")
 	assert.NoError(t, err)
@@ -88,19 +71,41 @@ func TestBuildRecipe(t *testing.T) {
 	defer os.Unsetenv("ELASTICSEARCH_API_KEY")
 	defer os.RemoveAll(featuresTempDir)
 
-	testDirPath := filepath.Join(featuresTempDir, "testpath")
+	testDirPath := filepath.Join(featuresTempDir, "dummypath")
 	err = os.Mkdir(testDirPath, 0755)
 	assert.NoError(t, err)
 	dummyFeatureFilePath := filepath.Join(testDirPath, "dummy.yml")
 	err = os.WriteFile(dummyFeatureFilePath, []byte(dummyFeature), 0755)
 	assert.NoError(t, err)
 
-	data, err := buildRecipe(strings.NewReader(dummyRecipe), RecipeParams{
+	data, err := BuildRecipe(strings.NewReader(dummyRecipe), RecipeParams{
 		FeaturesDirPath: featuresTempDir,
 		Args: map[string]string{
 			"endpoint": providedEndpoint,
 		},
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, strings.TrimSpace(expectedBuiltRecipe), string(data[:]))
+	assert.Equal(t, map[string]any{
+		"dummypath": map[string]any{
+			"dummy": map[string]any{
+				"es_api_key":  "my-other-exporter-key",
+				"es_endpoint": "http://external.endpoint",
+				"extra_key":   "other-extra-value",
+			},
+			"dummy/custom-name": map[string]any{
+				"es_api_key":  "external_api_key",
+				"es_endpoint": "http://recipe.global.endpoint",
+			},
+		},
+		"services": map[string]any{
+			"pipelines": map[string]any{
+				"traces": map[string]any{
+					"exporters": []any{"dummy/custom-name"},
+				},
+				"traces/something": map[string]any{
+					"exporters": []any{"dummy"},
+				},
+			},
+		},
+	}, data)
 }
