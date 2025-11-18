@@ -61,7 +61,10 @@ func buildRecipe(source io.Reader, params RecipeParams) ([]byte, error) {
 		if err != nil {
 			return nil, err
 		}
-		mergeMaps(builtFeatures, feature)
+		componentName := filepath.Base(filepath.Dir(featureFilePath))
+		mergeMaps(builtFeatures, map[string]any{
+			componentName: feature,
+		})
 	}
 
 	return yaml.Marshal(builtFeatures)

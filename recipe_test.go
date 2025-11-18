@@ -64,13 +64,13 @@ const (
 
 var expectedBuiltRecipe = `
 testpath:
-  dummy/custom-name:
-    es_endpoint: http://recipe.global.endpoint
-    es_api_key: external_api_key
   dummy:
-    es_endpoint: http://external.endpoint
     es_api_key: my-other-exporter-key
+    es_endpoint: http://external.endpoint
     extra_key: other-extra-value
+  dummy/custom-name:
+    es_api_key: external_api_key
+    es_endpoint: http://recipe.global.endpoint
 services:
   pipelines:
     traces:
@@ -102,5 +102,5 @@ func TestBuildRecipe(t *testing.T) {
 		},
 	})
 	assert.NoError(t, err)
-	assert.Equal(t, expectedBuiltRecipe, string(data[:]))
+	assert.Equal(t, strings.TrimSpace(expectedBuiltRecipe), string(data[:]))
 }
