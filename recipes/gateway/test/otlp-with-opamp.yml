@@ -1,7 +1,7 @@
 args:
-  - id: elastic_endpoint
+  elastic_endpoint:
     env: ELASTIC_URL
-  - id: elastic_api_key
+  elastic_api_key:
     env: ELASTIC_API_KEY
 features:
   otlp:
@@ -9,7 +9,7 @@ features:
     configurations: [ http, grpc ]
   elasticapm-connector:
     source: connectors/elasticapm.yml
-  elasticsearch-exporter:
+  elasticsearch:
     source: exporters/elasticsearch.yml
     vars:
       elastic_endpoint: $args.elastic_endpoint
