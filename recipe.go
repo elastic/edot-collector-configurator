@@ -1,11 +1,22 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
 type RecipeParams struct {
+	FeaturesDirPath string
 }
 
-func BuildRecipe() ([]byte, error) {
+type argsType struct {
+	Env string
+}
 
-	return nil, fmt.Errorf("Unknown error")
+type recipeType struct {
+	Args map[string]argsType `validate:"required"`
+}
+
+func buildRecipe(source io.Reader, params RecipeParams) ([]byte, error) {
+	return nil, fmt.Errorf("unknown error")
 }
