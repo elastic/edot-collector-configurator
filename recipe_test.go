@@ -25,7 +25,7 @@ configuration:
     append:
       - path: "$"
         content:
-          extra_key: $vars.some_var
+          extra_key: $vars.some_var and $vars.some_feature_name
 `
 var dummyRecipe = `
 args:
@@ -49,6 +49,7 @@ features:
       endpoint: $args.endpoint
       api_key: my-other-exporter-key
       some_var: other-extra-value
+      some_feature_name: $features.my-exporter
 services:
   pipelines:
     traces:
@@ -90,7 +91,7 @@ func TestBuildRecipe(t *testing.T) {
 			"dummy": map[string]any{
 				"es_api_key":  "my-other-exporter-key",
 				"es_endpoint": "http://external.endpoint",
-				"extra_key":   "other-extra-value",
+				"extra_key":   "other-extra-value and dummy/custom-name",
 			},
 			"dummy/custom-name": map[string]any{
 				"es_api_key":  "external_api_key",
