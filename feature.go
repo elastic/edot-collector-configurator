@@ -102,8 +102,12 @@ func buildFeature(source io.Reader, params Params) (map[string]any, error) {
 		}
 	}
 
+	featureName := params.Type
+	if len(params.Name) > 0 {
+		featureName = fmt.Sprintf("%s/%s", featureName, params.Name)
+	}
 	return map[string]any{
-		params.Type: body,
+		featureName: body,
 	}, nil
 }
 

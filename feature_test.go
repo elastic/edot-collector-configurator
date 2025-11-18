@@ -146,6 +146,7 @@ func TestBuildFeature(t *testing.T) {
 	for _, tc := range []struct {
 		testName             string
 		input                string
+		customName           string
 		featureType          string
 		configurations       []string
 		vars                 map[string]any
@@ -172,6 +173,19 @@ func TestBuildFeature(t *testing.T) {
 			configurations: []string{},
 			expectedResult: map[string]any{
 				"elasticsearch": map[string]any{
+					"endpoint": "default_endpoint",
+					"api_key":  "default_api_key",
+				},
+			},
+		},
+		{
+			testName:       "defining custom config key name",
+			input:          simpleConfiguration,
+			featureType:    "elasticsearch",
+			customName:     "my_name",
+			configurations: []string{},
+			expectedResult: map[string]any{
+				"elasticsearch/my_name": map[string]any{
 					"endpoint": "default_endpoint",
 					"api_key":  "default_api_key",
 				},
@@ -287,6 +301,7 @@ func TestBuildFeature(t *testing.T) {
 		t.Run(tc.testName, func(t *testing.T) {
 			result, err := buildFeature(strings.NewReader(tc.input), Params{
 				Type:               tc.featureType,
+				Name:               tc.customName,
 				ConfigurationNames: tc.configurations,
 				Vars:               tc.vars,
 			})
