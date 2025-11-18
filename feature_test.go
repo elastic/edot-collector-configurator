@@ -285,9 +285,8 @@ func TestBuildFeature(t *testing.T) {
 		},
 	} {
 		t.Run(tc.testName, func(t *testing.T) {
-			result, err := BuildFeature(Params{
+			result, err := buildFeature(strings.NewReader(tc.input), Params{
 				Type:               tc.featureType,
-				SourceFileReader:   strings.NewReader(tc.input),
 				ConfigurationNames: tc.configurations,
 				Vars:               tc.vars,
 			})

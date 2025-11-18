@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"maps"
+	"os"
 	"reflect"
 	"regexp"
 	"slices"
@@ -15,13 +16,9 @@ import (
 
 type Params struct {
 	Type               string
-	SourceFileReader   io.Reader
+	Name               string
 	ConfigurationNames []string
 	Vars               map[string]any
-}
-
-func NewParams(sourceFilePath string, configurationNames []string) Params {
-	panic("implement")
 }
 
 type varsType map[string]any
@@ -48,17 +45,26 @@ type featureType struct {
 const varsPatternStr = `\$vars\.[^\s]+`
 
 var (
-	refsPattern = regexp.MustCompile(`^\$refs\.[^\s]+$`)
-
+	refsPattern          = regexp.MustCompile(`^\$refs\.[^\s]+$`)
 	varPattern           = regexp.MustCompile(varsPatternStr)
 	fullStringVarPattern = regexp.MustCompile(fmt.Sprintf("^%s$", varsPatternStr))
 	yamlPathPattern      = regexp.MustCompile(`^\$((?:\.[^\s.]+)+)?$`)
 	dotSeparatedPattern  = regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
 )
 
-func BuildFeature(params Params) (map[string]any, error) {
+func BuildFeature(sourceFilePath string, params Params) (map[string]any, error) {
+	f, err := os.Open(sourceFilePath)
+	if err != nil {
+		return nil, err
+	}
+	defer f.Close()
+
+	return buildFeature(f, params)
+}
+
+func buildFeature(source io.Reader, params Params) (map[string]any, error) {
 	var err error
-	feature, err := parseFeatureFile(params.SourceFileReader)
+	feature, err := parseFeatureFile(source)
 	if err != nil {
 		return nil, err
 	}
