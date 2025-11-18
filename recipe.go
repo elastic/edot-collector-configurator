@@ -164,7 +164,7 @@ func getArgsRefs(argsDef map[string]argsDefType, providedArgs map[string]string)
 		if !ok {
 			envVarValue, err := getEnvVar(v.Env)
 			if err != nil {
-				return nil, err
+				return nil, fmt.Errorf("arg '%s' not provided - you may provide via the env var: '%s' or via the command line argument: '-A%s'", k, v.Env, k)
 			}
 			collected[k] = envVarValue
 		}

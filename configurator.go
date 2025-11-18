@@ -8,7 +8,8 @@ import (
 var outputFilePath string
 
 func init() {
-	flag.StringVar(&outputFilePath, "output", "otel.yml", "YAML file to write the configuration to")
+	flag.StringVar(&outputFilePath, "recipe", "", "path to the YAML recipe file")
+	flag.StringVar(&outputFilePath, "output", "otel.yml", "output YAML file path")
 }
 
 func main() {
