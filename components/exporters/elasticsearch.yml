@@ -7,7 +7,7 @@ refs:
 configuration:
   default:
     content: $refs.base
-  test:
+  insecure:
     content: $refs.base
     append:
       - path: "$"

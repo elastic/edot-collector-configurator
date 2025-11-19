@@ -1,0 +1,13 @@
+configuration:
+  default:
+    content:
+      source:
+        elasticsearch:
+          endpoint: $vars.endpoint
+          auth:
+            authenticator: $vars.authenticator
+          cache_duration: 10s
+      opamp:
+        protocols:
+          http:
+            endpoint: "localhost:4320"

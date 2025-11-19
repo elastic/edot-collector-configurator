@@ -1,0 +1,5 @@
+configuration:
+  default:
+    content:
+      scheme: APIKey
+      token: $vars.api_key

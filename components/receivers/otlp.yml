@@ -6,15 +6,11 @@ configuration:
     content: $refs.base
     refs:
       protocol:
-        common_list:
-          - http_one
         http:
           endpoint: 0.0.0.0:4318
   grpc:
     content: $refs.base
     refs:
       protocol:
-        common_list:
-          - grpc_one
         grpc:
           endpoint: 0.0.0.0:4317
