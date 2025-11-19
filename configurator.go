@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 func main() {
@@ -56,8 +57,15 @@ Arguments:
 func printRecipeInfo(recipePath string) {
 	recipe := getRecipe(recipePath)
 	argsDescription := ""
+	longestArgName := 0
+	for k := range recipe.Args {
+		if len(k) > longestArgName {
+			longestArgName = len(k)
+		}
+	}
 	for k, v := range recipe.Args {
-		argsDescription += fmt.Sprintf("  -A%s - %s", k, v.Description)
+		argName := "-A" + k
+		argsDescription += fmt.Sprintf("  %s%s%s", argName, strings.Repeat(" ", longestArgName-len(argName)+5), v.Description)
 		if v.Env != "" {
 			argsDescription += fmt.Sprintf(" (ENV var '%s')", v.Env)
 		}
