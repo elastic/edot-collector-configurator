@@ -20,6 +20,7 @@ func isPrimitive(value any) bool {
 		"string",
 		"bool",
 		"int",
+		"uint",
 		"float",
 	} {
 		if strings.HasPrefix(kindName, primitiveName) {
