@@ -31,8 +31,10 @@ var dummyRecipe = `
 description: Dummy recipe for tests
 args:
   endpoint:
+    description: ES endpoint
     env: ELASTICSEARCH_ENDPOINT
   api_key:
+    description: ES api key
     env: ELASTICSEARCH_API_KEY
 const:
   a_global_var: http://recipe.global.endpoint

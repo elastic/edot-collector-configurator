@@ -20,7 +20,8 @@ type RecipeParams struct {
 }
 
 type argsDefType struct {
-	Env string
+	Description string `validate:"required"`
+	Env         string
 }
 
 type componentDefType struct {

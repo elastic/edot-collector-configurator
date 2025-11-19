@@ -7,19 +7,43 @@ import (
 	"path/filepath"
 )
 
-var recipeFilePath string
-var outputFilePath string
-
-func init() {
-	flag.StringVar(&recipeFilePath, "recipe", "", "Path to the YAML recipe file")
-	flag.StringVar(&outputFilePath, "output", "otel.yml", "Output YAML file path")
+func main() {
+	args := os.Args
+	switch args[1] {
+	case "build":
+		buildRecipe(args[2], args[3:])
+	case "info":
+		printRecipeInfo(args[2])
+	default:
+		panic(fmt.Errorf("error: unknown command - %q", args[1]))
+	}
 }
 
-func main() {
-	flag.Parse()
-	recipe := getRecipe()
-	fmt.Printf("The components dir is: %s\n", getComponentsDirPath())
-	fmt.Printf("The recipe is: %v", recipe)
+func buildRecipe(recipePath string, args []string) {
+	recipe := getRecipe(recipePath)
+	fs := flag.NewFlagSet("build", flag.ExitOnError)
+	fs.String("output", "otel.yml", "Output YAML file path")
+	panic("Implement" + fmt.Sprint("%v", recipe))
+}
+
+var infoTemplate = `
+Recipe path: %s
+Description: %s
+Arguments:
+%s
+`
+
+func printRecipeInfo(recipePath string) {
+	recipe := getRecipe(recipePath)
+	argsDescription := ""
+	for k, v := range recipe.Args {
+		argsDescription += fmt.Sprintf("  -A%s - %s", k, v.Description)
+		if v.Env != "" {
+			argsDescription += fmt.Sprintf(" (ENV var '%s')", v.Env)
+		}
+		argsDescription += "\n"
+	}
+	fmt.Printf(infoTemplate, recipePath, recipe.Description, argsDescription)
 }
 
 func getComponentsDirPath() string {
@@ -28,7 +52,7 @@ func getComponentsDirPath() string {
 	return filepath.Join(filepath.Dir(executable), "components")
 }
 
-func getRecipe() recipeType {
+func getRecipe(recipeFilePath string) recipeType {
 	if recipeFilePath == "" {
 		panic(fmt.Errorf("recipe path not provided - pass it using the '-recipe' argument"))
 	}

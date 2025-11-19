@@ -1,8 +1,10 @@
 description: Receives OTLP data over HTTP and gRPC and exports it to Elasticsearch
 args:
   elastic_endpoint:
+    description: Your Elasticsearch endpoint to export data to
     env: ELASTIC_URL
   elastic_api_key:
+    description: Your Elasticseatch API Key
     env: ELASTIC_API_KEY
 components:
   otlp:
