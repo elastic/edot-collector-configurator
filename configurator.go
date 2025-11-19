@@ -16,13 +16,13 @@ func main() {
 	}
 	switch args[1] {
 	case "build":
-		buildRecipe(args[2], args[3:])
+		buildRecipe(args)
 	case "info":
-		printRecipeInfo(args[2])
+		printRecipeInfo(args)
 	case "help":
 		printHelpMessage()
 	default:
-		fmt.Printf("error: unknown command - %q\n", args[1])
+		printError(fmt.Errorf("unknown command - %q", args[1]))
 		printHelpMessage()
 	}
 }
@@ -33,18 +33,31 @@ USAGE
 
 SUBCOMMANDS
   info   path/to/recipe.yml                       Displays information about the provided recipe and its arguments.
-  build  path/to/recipe.yml [-output=file.yml]    Builds a configuration based on the recipe file provided.
+  build  path/to/recipe.yml [-output=otel.yml]    Builds a configuration based on the recipe file provided.
 `
 
 func printHelpMessage() {
 	fmt.Println(helpMessage)
 }
 
-func buildRecipe(recipePath string, args []string) {
-	recipe := getRecipe(recipePath)
+func buildRecipe(args []string) {
+	err := checkRecipeProvided(args)
+	if err != nil {
+		printError(err)
+		return
+	}
+	recipe := getRecipe(args[2])
+
 	fs := flag.NewFlagSet("build", flag.ExitOnError)
-	fs.String("output", "otel.yml", "Output YAML file path")
-	panic("Implement" + fmt.Sprintf("%v", recipe))
+	outputPath := fs.String("output", "otel.yml", "Output YAML file path")
+
+	flagSetArgs := []string{}
+	if len(args) > 3 {
+		flagSetArgs = append(flagSetArgs, args[3:]...)
+	}
+	fs.Parse(flagSetArgs)
+
+	fmt.Printf("The output path is: %s and the recipe: %v", *outputPath, recipe)
 }
 
 var infoTemplate = `
@@ -54,7 +67,13 @@ Arguments:
 %s
 `
 
-func printRecipeInfo(recipePath string) {
+func printRecipeInfo(args []string) {
+	err := checkRecipeProvided(args)
+	if err != nil {
+		printError(err)
+		return
+	}
+	recipePath := args[2]
 	recipe := getRecipe(recipePath)
 	argsDescription := ""
 	longestArgName := 0
@@ -74,6 +93,13 @@ func printRecipeInfo(recipePath string) {
 	fmt.Printf(infoTemplate, recipePath, recipe.Description, argsDescription)
 }
 
+func checkRecipeProvided(args []string) error {
+	if len(args) < 3 {
+		return fmt.Errorf("you must provide the recipe file name")
+	}
+	return nil
+}
+
 func getComponentsDirPath() string {
 	executable, err := os.Executable()
 	checkError(err)
@@ -81,9 +107,6 @@ func getComponentsDirPath() string {
 }
 
 func getRecipe(recipeFilePath string) recipeType {
-	if recipeFilePath == "" {
-		panic(fmt.Errorf("recipe path not provided - pass it using the '-recipe' argument"))
-	}
 	wd, err := os.Getwd()
 	checkError(err)
 	f, err := os.Open(filepath.Join(wd, recipeFilePath))
@@ -99,4 +122,8 @@ func checkError(err error) {
 	if err != nil {
 		panic(err)
 	}
+}
+
+func printError(err error) {
+	fmt.Fprintf(os.Stderr, "error: %v\n", err)
 }
