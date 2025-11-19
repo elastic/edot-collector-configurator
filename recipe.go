@@ -70,7 +70,7 @@ func BuildRecipe(recipe *recipeType, params RecipeParams) (map[string]any, error
 			return nil, err
 		}
 	}
-	resolvedServices := maps.Clone(recipe.Services)
+	resolvedServices := recipe.Services
 	err = replacePlaceholdersInMap(resolvedServices, *anyArgPattern, allArguments)
 	if err != nil {
 		return nil, err
