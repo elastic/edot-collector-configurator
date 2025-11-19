@@ -1,3 +1,4 @@
+description: Receives OTLP data over HTTP and gRPC and exports it to Elasticsearch
 args:
   elastic_endpoint:
     env: ELASTIC_URL

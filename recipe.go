@@ -31,10 +31,11 @@ type featureDefType struct {
 }
 
 type recipeType struct {
-	Args     map[string]argsDefType    `validate:"required"`
-	Features map[string]featureDefType `validate:"required"`
-	Services map[string]any            `validate:"required"`
-	Const    map[string]any
+	Args        map[string]argsDefType    `validate:"required"`
+	Description string                    `validate:"required"`
+	Features    map[string]featureDefType `validate:"required"`
+	Services    map[string]any            `validate:"required"`
+	Const       map[string]any
 }
 
 func ParseRecipe(source io.Reader) (recipeType, error) {

@@ -28,6 +28,7 @@ configuration:
           extra_key: $vars.some_var and $vars.some_feature_name
 `
 var dummyRecipe = `
+description: Dummy recipe for tests
 args:
   endpoint:
     env: ELASTICSEARCH_ENDPOINT
