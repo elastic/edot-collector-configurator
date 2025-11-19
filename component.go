@@ -209,7 +209,12 @@ func resolveStringRef(content string, configRefs refsType) (map[string]any, erro
 }
 
 func collectRefs(component *componentType, configuration configurationType) refsType {
-	collected := maps.Clone(component.Refs)
+	var collected refsType
+	if component.Refs != nil {
+		collected = maps.Clone(component.Refs)
+	} else {
+		collected = make(refsType)
+	}
 	maps.Copy(collected, configuration.Refs)
 
 	refPrefixedMap := make(refsType, len(collected))
@@ -221,7 +226,12 @@ func collectRefs(component *componentType, configuration configurationType) refs
 }
 
 func collectVars(component *componentType, configuration configurationType, params ComponentParams) (varsType, error) {
-	collected := maps.Clone(component.Vars)
+	var collected varsType
+	if component.Vars != nil {
+		collected = maps.Clone(component.Vars)
+	} else {
+		collected = make(varsType)
+	}
 	maps.Copy(collected, configuration.Vars)
 	maps.Copy(collected, params.Vars)
 	return prependToKeysOfPrimitiveValues(collected, "$vars.")

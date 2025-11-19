@@ -161,7 +161,12 @@ func getConstantsRefs(provided map[string]any) (map[string]any, error) {
 }
 
 func getArgsRefs(argsDef map[string]argsDefType, providedArgs map[string]string) (map[string]string, error) {
-	collected := maps.Clone(providedArgs)
+	var collected map[string]string
+	if providedArgs != nil {
+		collected = maps.Clone(providedArgs)
+	} else {
+		collected = make(map[string]string)
+	}
 	for k, v := range argsDef {
 		_, ok := collected[k]
 		if !ok {

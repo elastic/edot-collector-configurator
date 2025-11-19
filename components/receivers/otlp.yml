@@ -1,7 +1,6 @@
 refs:
   base:
-    protocols: 
-      $refs.protocol
+    protocols: $refs.protocol
 configuration:
   http:
     content: $refs.base

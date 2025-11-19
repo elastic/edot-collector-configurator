@@ -6,6 +6,8 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/goccy/go-yaml"
 )
 
 func main() {
@@ -52,12 +54,42 @@ func buildRecipe(args []string) {
 	outputPath := fs.String("output", "otel.yml", "Output YAML file path")
 
 	flagSetArgs := []string{}
+	recipeArgs := make(map[string]string)
+	for k, v := range recipe.Args {
+		fs.Func("A"+k, v.Description, func(s string) error {
+			recipeArgs[k] = s
+			return nil
+		})
+	}
 	if len(args) > 3 {
 		flagSetArgs = append(flagSetArgs, args[3:]...)
 	}
 	fs.Parse(flagSetArgs)
 
-	fmt.Printf("The output path is: %s and the recipe: %v", *outputPath, recipe)
+	configuration, err := BuildRecipe(&recipe, RecipeParams{
+		Args:              recipeArgs,
+		ComponentsDirPath: getComponentsDirPath(),
+	})
+
+	checkUnexpectedError(err)
+	saveConfiguration(configuration, *outputPath)
+}
+
+func saveConfiguration(configuration map[string]any, outputPath string) {
+	yamlData, err := yaml.Marshal(configuration)
+	checkUnexpectedError(err)
+	f, err := os.Open(outputPath)
+	checkUnexpectedError(err)
+	defer f.Close()
+
+	_, err = f.Write(yamlData)
+	checkUnexpectedError(err)
+}
+
+func getComponentsDirPath() string {
+	executable, err := os.Executable()
+	checkUnexpectedError(err)
+	return filepath.Join(filepath.Dir(executable), "components")
 }
 
 var infoTemplate = `
@@ -100,25 +132,19 @@ func checkRecipeProvided(args []string) error {
 	return nil
 }
 
-func getComponentsDirPath() string {
-	executable, err := os.Executable()
-	checkError(err)
-	return filepath.Join(filepath.Dir(executable), "components")
-}
-
 func getRecipe(recipeFilePath string) recipeType {
 	wd, err := os.Getwd()
-	checkError(err)
+	checkUnexpectedError(err)
 	f, err := os.Open(filepath.Join(wd, recipeFilePath))
-	checkError(err)
+	checkUnexpectedError(err)
 	defer f.Close()
 
 	recipe, err := ParseRecipe(f)
-	checkError(err)
+	checkUnexpectedError(err)
 	return recipe
 }
 
-func checkError(err error) {
+func checkUnexpectedError(err error) {
 	if err != nil {
 		panic(err)
 	}
