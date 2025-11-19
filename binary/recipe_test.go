@@ -53,7 +53,7 @@ components:
       api_key: my-other-exporter-key
       some_var: other-extra-value
       some_component_name: $components.my-exporter
-services:
+service:
   pipelines:
     traces:
       exporters: [ $components.my-exporter ]

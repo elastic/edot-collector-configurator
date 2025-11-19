@@ -1,0 +1,55 @@
+description: |
+  Receives OTLP data over HTTP and gRPC and exports it to Elasticsearch.
+  It also spins up an OpAMP Server, used to make Central Configuration work with the EDOT Agents.
+args:
+  elastic_endpoint:
+    description: Your Elasticsearch endpoint
+    env: ELASTIC_URL
+  elastic_api_key:
+    description: Your Elasticseatch API Key
+    env: ELASTIC_API_KEY
+components:
+  otlp:
+    source: receivers/otlp.yml
+    configurations: [ http, grpc ]
+  elasticapm-connector:
+    source: connectors/elasticapm.yml
+  elasticsearch-exporter:
+    source: exporters/elasticsearch.yml
+    vars:
+      elastic_endpoint: $args.elastic_endpoint
+      elastic_api_key: $args.elastic_api_key
+  elasticapm-processor:
+    source: processors/elasticapm.yml
+  batch:
+    source: processors/batch.yml
+  debug-exporter:
+    source: exporters/debug.yml
+  bearerauth:
+    source: extensions/bearertokenauth.yml
+    vars:
+      api_key: $args.elastic_api_key
+  apmconfig:
+    source: extensions/apmconfig.yml
+    vars:
+      endpoint: $args.elastic_endpoint
+      authenticator: $components.bearerauth
+service:
+  extensions: [ $components.bearerauth, $components.apmconfig ]
+  pipelines:
+    traces:
+      receivers: [ $components.otlp ]
+      processors: [ $components.batch, $components.elasticapm-processor ]
+      exporters: [ $components.debug-exporter, $components.elasticapm-connector, $components.elasticsearch-exporter ]
+    logs:
+      receivers: [ $components.otlp ]
+      processors: [ $components.batch, $components.elasticapm-processor ]
+      exporters: [ $components.debug-exporter, $components.elasticapm-connector, $components.elasticsearch-exporter ]
+    metrics:
+      receivers: [ $components.otlp ]
+      processors: [ $components.batch, $components.elasticapm-processor ]
+      exporters: [ $components.debug-exporter, $components.elasticsearch-exporter ]
+    metrics/aggregated-otel-metrics:
+      receivers: [ $components.elasticapm-connector ]
+      processors: [ ]
+      exporters: [ $components.debug-exporter, $components.elasticsearch-exporter ]

@@ -35,7 +35,7 @@ type recipeType struct {
 	Args        map[string]argsDefType      `validate:"required"`
 	Description string                      `validate:"required"`
 	Components  map[string]componentDefType `validate:"required"`
-	Services    map[string]any              `validate:"required"`
+	Service     map[string]any              `validate:"required"`
 	Const       map[string]any
 }
 
@@ -70,7 +70,7 @@ func BuildRecipe(recipe *recipeType, params RecipeParams) (map[string]any, error
 			return nil, err
 		}
 	}
-	resolvedServices := recipe.Services
+	resolvedServices := recipe.Service
 	err = replacePlaceholdersInMap(resolvedServices, *anyArgPattern, allArguments)
 	if err != nil {
 		return nil, err
