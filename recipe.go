@@ -37,13 +37,14 @@ type recipeType struct {
 	Const    map[string]any
 }
 
-func BuildRecipe(source io.Reader, params RecipeParams) (map[string]any, error) {
-	var err error
+func ParseRecipe(source io.Reader) (recipeType, error) {
 	recipe := &recipeType{}
-	err = parseYamlFile(source, recipe)
-	if err != nil {
-		return nil, err
-	}
+	err := parseYamlFile(source, recipe)
+	return *recipe, err
+}
+
+func BuildRecipe(recipe *recipeType, params RecipeParams) (map[string]any, error) {
+	var err error
 	featureNames, err := getFeatureNames(recipe)
 	if err != nil {
 		return nil, err

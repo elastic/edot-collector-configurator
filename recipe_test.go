@@ -79,7 +79,9 @@ func TestBuildRecipe(t *testing.T) {
 	err = os.WriteFile(dummyFeatureFilePath, []byte(dummyFeature), 0755)
 	assert.NoError(t, err)
 
-	data, err := BuildRecipe(strings.NewReader(dummyRecipe), RecipeParams{
+	recipe, err := ParseRecipe(strings.NewReader(dummyRecipe))
+	assert.NoError(t, err)
+	data, err := BuildRecipe(&recipe, RecipeParams{
 		FeaturesDirPath: featuresTempDir,
 		Args: map[string]string{
 			"endpoint": providedEndpoint,
