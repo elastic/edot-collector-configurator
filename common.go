@@ -89,6 +89,8 @@ func mergeMaps(dst map[string]any, src map[string]any) error {
 				if err != nil {
 					return err
 				}
+			} else if isList(v) {
+				dst[k] = append(dstVal.([]any)[:], v.([]any)...)
 			} else {
 				return fmt.Errorf("key overlap for '%v'", k)
 			}

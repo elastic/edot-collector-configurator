@@ -1,0 +1,23 @@
+connectors:
+  elasticapm: {}
+exporters:
+  elasticsearch:
+    api_key: MY_API_KEY
+    endpoint: MY_ENDPOINT
+    mapping:
+      mode: otel
+receivers:
+  otlp:
+    protocols:
+      common_list:
+      - http_one
+      - grpc_one
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+services:
+  pipelines:
+    traces:
+      receivers:
+      - otlp
