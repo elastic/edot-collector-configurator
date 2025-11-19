@@ -9,21 +9,41 @@ import (
 
 func main() {
 	args := os.Args
+	if len(args) < 2 {
+		printHelpMessage()
+		return
+	}
 	switch args[1] {
 	case "build":
 		buildRecipe(args[2], args[3:])
 	case "info":
 		printRecipeInfo(args[2])
+	case "help":
+		printHelpMessage()
 	default:
-		panic(fmt.Errorf("error: unknown command - %q", args[1]))
+		fmt.Printf("error: unknown command - %q\n", args[1])
+		printHelpMessage()
 	}
+}
+
+var helpMessage = `
+USAGE
+  configurator [subcommand]
+
+SUBCOMMANDS
+  info   path/to/recipe.yml                       Displays information about the provided recipe and its arguments.
+  build  path/to/recipe.yml [-output=file.yml]    Builds a configuration based on the recipe file provided.
+`
+
+func printHelpMessage() {
+	fmt.Println(helpMessage)
 }
 
 func buildRecipe(recipePath string, args []string) {
 	recipe := getRecipe(recipePath)
 	fs := flag.NewFlagSet("build", flag.ExitOnError)
 	fs.String("output", "otel.yml", "Output YAML file path")
-	panic("Implement" + fmt.Sprint("%v", recipe))
+	panic("Implement" + fmt.Sprintf("%v", recipe))
 }
 
 var infoTemplate = `
