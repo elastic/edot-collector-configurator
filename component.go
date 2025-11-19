@@ -211,7 +211,7 @@ func resolveStringRef(content string, configRefs refsType) (map[string]any, erro
 func collectRefs(componentRefs refsType, configuration configurationType) refsType {
 	var collected = make(refsType)
 	if componentRefs != nil {
-		mergeMaps(collected, componentRefs)
+		collected = deepCopy(map[string]any(componentRefs))
 	}
 	maps.Copy(collected, configuration.Refs)
 	refPrefixedMap := make(refsType, len(collected))

@@ -38,12 +38,46 @@ func isMap(value any) bool {
 }
 
 func isList(value any) bool {
-	kind := getKind(value)
-	return kind == reflect.Slice || kind == reflect.Array
+	return isSlice(value) || isArray(value)
+}
+
+func isSlice(value any) bool {
+	return getKind(value) == reflect.Slice
+}
+
+func isArray(value any) bool {
+	return getKind(value) == reflect.Array
 }
 
 func getKind(value any) reflect.Kind {
 	return reflect.TypeOf(value).Kind()
+}
+
+func deepCopy[T any](v T) T {
+	return deepCopyAny(v).(T)
+}
+
+func deepCopyAny(value any) any {
+	switch {
+	case isMap(value):
+		mapValue := value.(map[string]any)
+		cp := make(map[string]any, len(mapValue))
+		for k, v2 := range mapValue {
+			cp[k] = deepCopyAny(v2)
+		}
+		return cp
+
+	case isSlice(value):
+		sliceValue := value.([]any)
+		cp := make([]any, len(sliceValue))
+		for i, v2 := range sliceValue {
+			cp[i] = deepCopyAny(v2)
+		}
+		return cp
+
+	default:
+		return value
+	}
 }
 
 func mergeMaps(dst map[string]any, src map[string]any) error {
@@ -59,16 +93,7 @@ func mergeMaps(dst map[string]any, src map[string]any) error {
 				return fmt.Errorf("key overlap for '%v'", k)
 			}
 		} else {
-			if isMap(v) {
-				newMap := make(map[string]any)
-				err := mergeMaps(newMap, v.(map[string]any))
-				if err != nil {
-					return err
-				}
-				dst[k] = newMap
-			} else {
-				dst[k] = v
-			}
+			dst[k] = v
 		}
 	}
 	return nil
