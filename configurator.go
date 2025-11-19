@@ -78,7 +78,7 @@ func buildRecipe(args []string) {
 func saveConfiguration(configuration map[string]any, outputPath string) {
 	yamlData, err := yaml.Marshal(configuration)
 	checkUnexpectedError(err)
-	f, err := os.Open(outputPath)
+	f, err := os.Create(outputPath)
 	checkUnexpectedError(err)
 	defer f.Close()
 

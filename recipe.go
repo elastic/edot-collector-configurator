@@ -63,18 +63,24 @@ func BuildRecipe(recipe *recipeType, params RecipeParams) (map[string]any, error
 			return nil, err
 		}
 		componentName := filepath.Base(filepath.Dir(componentFilePath))
-		mergeMaps(builtComponents, map[string]any{
+		err = mergeMaps(builtComponents, map[string]any{
 			componentName: component,
 		})
+		if err != nil {
+			return nil, err
+		}
 	}
 	resolvedServices := maps.Clone(recipe.Services)
 	err = replacePlaceholdersInMap(resolvedServices, *anyArgPattern, allArguments)
 	if err != nil {
 		return nil, err
 	}
-	mergeMaps(builtComponents, map[string]any{
+	err = mergeMaps(builtComponents, map[string]any{
 		"services": resolvedServices,
 	})
+	if err != nil {
+		return nil, err
+	}
 
 	return builtComponents, nil
 }

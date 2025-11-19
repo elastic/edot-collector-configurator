@@ -14,7 +14,7 @@ type ComponentParams struct {
 	Vars               map[string]any
 }
 
-type refsType map[string]map[string]any
+type refsType map[string]any
 
 type appendType struct {
 	Path    string `validate:"required"`
@@ -61,7 +61,7 @@ func BuildComponent(source io.Reader, params ComponentParams) (map[string]any, e
 		if !ok {
 			return nil, fmt.Errorf("couldn't find configuration named '%v'", key)
 		}
-		configRefs := collectRefs(component, configuration)
+		configRefs := collectRefs(component.Refs, configuration)
 		configContent, err := resolveConfigContent(configuration.Content, configRefs)
 		if err != nil {
 			return nil, err
@@ -205,18 +205,15 @@ func resolveStringRef(content string, configRefs refsType) (map[string]any, erro
 	if !ok {
 		return nil, fmt.Errorf("'%s' is not defined", refId)
 	}
-	return ref, nil
+	return ref.(map[string]any), nil
 }
 
-func collectRefs(component *componentType, configuration configurationType) refsType {
-	var collected refsType
-	if component.Refs != nil {
-		collected = maps.Clone(component.Refs)
-	} else {
-		collected = make(refsType)
+func collectRefs(componentRefs refsType, configuration configurationType) refsType {
+	var collected = make(refsType)
+	if componentRefs != nil {
+		mergeMaps(collected, componentRefs)
 	}
 	maps.Copy(collected, configuration.Refs)
-
 	refPrefixedMap := make(refsType, len(collected))
 	for k, v := range collected {
 		refPrefixedMap["$refs."+k] = v

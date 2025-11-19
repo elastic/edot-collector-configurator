@@ -59,7 +59,16 @@ func mergeMaps(dst map[string]any, src map[string]any) error {
 				return fmt.Errorf("key overlap for '%v'", k)
 			}
 		} else {
-			dst[k] = v
+			if isMap(v) {
+				newMap := make(map[string]any)
+				err := mergeMaps(newMap, v.(map[string]any))
+				if err != nil {
+					return err
+				}
+				dst[k] = newMap
+			} else {
+				dst[k] = v
+			}
 		}
 	}
 	return nil
