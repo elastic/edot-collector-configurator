@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var dummyFeature = `
+var dummyComponent = `
 vars:
   endpoint: http://localhost:8080
   api_key: default_api_key
@@ -25,7 +25,7 @@ configuration:
     append:
       - path: "$"
         content:
-          extra_key: $vars.some_var and $vars.some_feature_name
+          extra_key: $vars.some_var and $vars.some_component_name
 `
 var dummyRecipe = `
 description: Dummy recipe for tests
@@ -36,7 +36,7 @@ args:
     env: ELASTICSEARCH_API_KEY
 const:
   a_global_var: http://recipe.global.endpoint
-features:
+components:
   my-exporter:
     source: dummypath/dummy.yml
     name: custom-name
@@ -50,13 +50,13 @@ features:
       endpoint: $args.endpoint
       api_key: my-other-exporter-key
       some_var: other-extra-value
-      some_feature_name: $features.my-exporter
+      some_component_name: $components.my-exporter
 services:
   pipelines:
     traces:
-      exporters: [ $features.my-exporter ]
+      exporters: [ $components.my-exporter ]
     traces/something:
-      exporters: [ $features.my-other-exporter ]
+      exporters: [ $components.my-other-exporter ]
 `
 
 const (
@@ -65,25 +65,25 @@ const (
 )
 
 func TestBuildRecipe(t *testing.T) {
-	featuresTempDir, err := os.MkdirTemp("", "features")
+	componentsTempDir, err := os.MkdirTemp("", "components")
 	assert.NoError(t, err)
 	os.Setenv("ELASTICSEARCH_ENDPOINT", "http://endpoint.from.env")
 	os.Setenv("ELASTICSEARCH_API_KEY", providedApiKey)
 	defer os.Unsetenv("ELASTICSEARCH_ENDPOINT")
 	defer os.Unsetenv("ELASTICSEARCH_API_KEY")
-	defer os.RemoveAll(featuresTempDir)
+	defer os.RemoveAll(componentsTempDir)
 
-	testDirPath := filepath.Join(featuresTempDir, "dummypath")
+	testDirPath := filepath.Join(componentsTempDir, "dummypath")
 	err = os.Mkdir(testDirPath, 0755)
 	assert.NoError(t, err)
-	dummyFeatureFilePath := filepath.Join(testDirPath, "dummy.yml")
-	err = os.WriteFile(dummyFeatureFilePath, []byte(dummyFeature), 0755)
+	dummyComponentFilePath := filepath.Join(testDirPath, "dummy.yml")
+	err = os.WriteFile(dummyComponentFilePath, []byte(dummyComponent), 0755)
 	assert.NoError(t, err)
 
 	recipe, err := ParseRecipe(strings.NewReader(dummyRecipe))
 	assert.NoError(t, err)
 	data, err := BuildRecipe(&recipe, RecipeParams{
-		FeaturesDirPath: featuresTempDir,
+		ComponentsDirPath: componentsTempDir,
 		Args: map[string]string{
 			"endpoint": providedEndpoint,
 		},

@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
 )
 
 var recipeFilePath string
@@ -13,7 +15,11 @@ func init() {
 }
 
 func main() {
-	flag.Parse()
-	// fs := flag.NewFlagSet("args", flag.ContinueOnError)
+	executable, err := os.Executable()
+	if err != nil {
+		panic(err)
+	}
+	fmt.Printf("Ex: %s", executable)
 
+	flag.Parse()
 }

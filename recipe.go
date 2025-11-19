@@ -11,19 +11,19 @@ import (
 
 var (
 	yamlFileNamePattern = regexp.MustCompile(`(.+)\.[yY][aA]?[mM][lL]`)
-	anyArgPattern       = regexp.MustCompile(fmt.Sprintf("%s|%s|%s", `\$const\.[^\s]+`, `\$args\.[^\s]+`, `\$features\.[^\s]+`))
+	anyArgPattern       = regexp.MustCompile(fmt.Sprintf("%s|%s|%s", `\$const\.[^\s]+`, `\$args\.[^\s]+`, `\$components\.[^\s]+`))
 )
 
 type RecipeParams struct {
-	Args            map[string]string
-	FeaturesDirPath string
+	Args              map[string]string
+	ComponentsDirPath string
 }
 
 type argsDefType struct {
 	Env string
 }
 
-type featureDefType struct {
+type componentDefType struct {
 	Source         string `validate:"required"`
 	Name           string
 	Configurations []string
@@ -31,10 +31,10 @@ type featureDefType struct {
 }
 
 type recipeType struct {
-	Args        map[string]argsDefType    `validate:"required"`
-	Description string                    `validate:"required"`
-	Features    map[string]featureDefType `validate:"required"`
-	Services    map[string]any            `validate:"required"`
+	Args        map[string]argsDefType      `validate:"required"`
+	Description string                      `validate:"required"`
+	Components  map[string]componentDefType `validate:"required"`
+	Services    map[string]any              `validate:"required"`
 	Const       map[string]any
 }
 
@@ -46,24 +46,24 @@ func ParseRecipe(source io.Reader) (recipeType, error) {
 
 func BuildRecipe(recipe *recipeType, params RecipeParams) (map[string]any, error) {
 	var err error
-	featureNames, err := getFeatureNames(recipe)
+	componentNames, err := getComponentNames(recipe)
 	if err != nil {
 		return nil, err
 	}
-	allArguments, err := collectAllArguments(recipe, params, featureNames)
+	allArguments, err := collectAllArguments(recipe, params, componentNames)
 	if err != nil {
 		return nil, err
 	}
-	builtFeatures := make(map[string]any)
-	for k, v := range recipe.Features {
-		featureFilePath := filepath.Join(params.FeaturesDirPath, v.Source)
-		feature, err := buildFeature(featureNames[k], featureFilePath, v, allArguments)
+	builtComponents := make(map[string]any)
+	for k, v := range recipe.Components {
+		componentFilePath := filepath.Join(params.ComponentsDirPath, v.Source)
+		component, err := buildComponent(componentNames[k], componentFilePath, v, allArguments)
 		if err != nil {
 			return nil, err
 		}
-		componentName := filepath.Base(filepath.Dir(featureFilePath))
-		mergeMaps(builtFeatures, map[string]any{
-			componentName: feature,
+		componentName := filepath.Base(filepath.Dir(componentFilePath))
+		mergeMaps(builtComponents, map[string]any{
+			componentName: component,
 		})
 	}
 	resolvedServices := maps.Clone(recipe.Services)
@@ -71,32 +71,32 @@ func BuildRecipe(recipe *recipeType, params RecipeParams) (map[string]any, error
 	if err != nil {
 		return nil, err
 	}
-	mergeMaps(builtFeatures, map[string]any{
+	mergeMaps(builtComponents, map[string]any{
 		"services": resolvedServices,
 	})
 
-	return builtFeatures, nil
+	return builtComponents, nil
 }
 
-func buildFeature(featureName string, featureFilePath string, featureDef featureDefType, arguments map[string]any) (map[string]any, error) {
-	vars, err := resolveVars(featureDef.Vars, arguments)
+func buildComponent(componentName string, componentFilePath string, componentDef componentDefType, arguments map[string]any) (map[string]any, error) {
+	vars, err := resolveVars(componentDef.Vars, arguments)
 	if err != nil {
 		return nil, err
 	}
-	featureFile, err := os.Open(featureFilePath)
+	componentFile, err := os.Open(componentFilePath)
 	if err != nil {
 		return nil, err
 	}
-	defer featureFile.Close()
+	defer componentFile.Close()
 
-	return BuildFeature(featureFile, FetureParams{
-		Name:               featureName,
-		ConfigurationNames: featureDef.Configurations,
+	return BuildComponent(componentFile, ComponentParams{
+		Name:               componentName,
+		ConfigurationNames: componentDef.Configurations,
 		Vars:               vars,
 	})
 }
 
-func collectAllArguments(recipe *recipeType, params RecipeParams, featureNames map[string]string) (map[string]any, error) {
+func collectAllArguments(recipe *recipeType, params RecipeParams, componentNames map[string]string) (map[string]any, error) {
 	argsRefs, err := getArgsRefs(recipe.Args, params.Args)
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func collectAllArguments(recipe *recipeType, params RecipeParams, featureNames m
 	if err != nil {
 		return nil, err
 	}
-	featureNameRefs, err := prependToKeysOfPrimitiveValues(featureNames, "$features.")
+	componentNameRefs, err := prependToKeysOfPrimitiveValues(componentNames, "$components.")
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func collectAllArguments(recipe *recipeType, params RecipeParams, featureNames m
 	for k, v := range constRefs {
 		allValues[k] = v
 	}
-	for k, v := range featureNameRefs {
+	for k, v := range componentNameRefs {
 		allValues[k] = v
 	}
 	return allValues, nil
@@ -138,21 +138,21 @@ func resolveVars(varsType varsType, arguments map[string]any) (map[string]any, e
 	return result, nil
 }
 
-func getFeatureNames(recipe *recipeType) (map[string]string, error) {
-	featureNames := make(map[string]string)
-	for k, v := range recipe.Features {
+func getComponentNames(recipe *recipeType) (map[string]string, error) {
+	componentNames := make(map[string]string)
+	for k, v := range recipe.Components {
 		sourceName := filepath.Base(v.Source)
-		featureType := yamlFileNamePattern.FindStringSubmatch(sourceName)[1]
-		if featureType == "" {
-			return nil, fmt.Errorf("could not get feature type from source path: '%s'", v.Source)
+		componentType := yamlFileNamePattern.FindStringSubmatch(sourceName)[1]
+		if componentType == "" {
+			return nil, fmt.Errorf("could not get component type from source path: '%s'", v.Source)
 		}
-		name := featureType
+		name := componentType
 		if len(v.Name) > 0 {
 			name = fmt.Sprintf("%s/%s", name, v.Name)
 		}
-		featureNames[k] = name
+		componentNames[k] = name
 	}
-	return featureNames, nil
+	return componentNames, nil
 }
 
 func getConstantsRefs(provided map[string]any) (map[string]any, error) {

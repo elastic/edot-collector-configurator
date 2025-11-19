@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-type FetureParams struct {
+type ComponentParams struct {
 	Name               string
 	ConfigurationNames []string
 	Vars               map[string]any
@@ -28,7 +28,7 @@ type configurationType struct {
 	Append  []appendType
 }
 
-type featureType struct {
+type componentType struct {
 	Configuration map[string]configurationType `validate:"required"`
 	Vars          varsType
 	Refs          refsType
@@ -41,13 +41,13 @@ var (
 	dotSeparatedPattern = regexp.MustCompile(`'[^\s]+'|[^.\s]+`)
 )
 
-func BuildFeature(source io.Reader, params FetureParams) (map[string]any, error) {
+func BuildComponent(source io.Reader, params ComponentParams) (map[string]any, error) {
 	var err error
 	if params.Name == "" {
 		return nil, fmt.Errorf("name param not set")
 	}
-	feature := &featureType{}
-	err = parseYamlFile(source, feature)
+	component := &componentType{}
+	err = parseYamlFile(source, component)
 	if err != nil {
 		return nil, err
 	}
@@ -57,11 +57,11 @@ func BuildFeature(source io.Reader, params FetureParams) (map[string]any, error)
 		configs = []string{"default"}
 	}
 	for _, key := range configs {
-		configuration, ok := feature.Configuration[key]
+		configuration, ok := component.Configuration[key]
 		if !ok {
 			return nil, fmt.Errorf("couldn't find configuration named '%v'", key)
 		}
-		configRefs := collectRefs(feature, configuration)
+		configRefs := collectRefs(component, configuration)
 		configContent, err := resolveConfigContent(configuration.Content, configRefs)
 		if err != nil {
 			return nil, err
@@ -74,7 +74,7 @@ func BuildFeature(source io.Reader, params FetureParams) (map[string]any, error)
 		if err != nil {
 			return nil, err
 		}
-		configVars, err := collectVars(feature, configuration, params)
+		configVars, err := collectVars(component, configuration, params)
 		if err != nil {
 			return nil, err
 		}
@@ -208,8 +208,8 @@ func resolveStringRef(content string, configRefs refsType) (map[string]any, erro
 	return ref, nil
 }
 
-func collectRefs(feature *featureType, configuration configurationType) refsType {
-	collected := maps.Clone(feature.Refs)
+func collectRefs(component *componentType, configuration configurationType) refsType {
+	collected := maps.Clone(component.Refs)
 	maps.Copy(collected, configuration.Refs)
 
 	refPrefixedMap := make(refsType, len(collected))
@@ -220,8 +220,8 @@ func collectRefs(feature *featureType, configuration configurationType) refsType
 	return refPrefixedMap
 }
 
-func collectVars(feature *featureType, configuration configurationType, params FetureParams) (varsType, error) {
-	collected := maps.Clone(feature.Vars)
+func collectVars(component *componentType, configuration configurationType, params ComponentParams) (varsType, error) {
+	collected := maps.Clone(component.Vars)
 	maps.Copy(collected, configuration.Vars)
 	maps.Copy(collected, params.Vars)
 	return prependToKeysOfPrimitiveValues(collected, "$vars.")
