@@ -1,4 +1,4 @@
-APP_NAME := collector
+APP_NAME := configurator
 SRC := $(shell find . -name '*.go')
 
 .PHONY: all run clean

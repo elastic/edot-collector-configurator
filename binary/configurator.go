@@ -89,7 +89,7 @@ func saveConfiguration(configuration map[string]any, outputPath string) {
 func getComponentsDirPath() string {
 	executable, err := os.Executable()
 	checkUnexpectedError(err)
-	return filepath.Join(filepath.Dir(executable), "components")
+	return filepath.Join(filepath.Dir(filepath.Dir(executable)), "components")
 }
 
 var infoTemplate = `

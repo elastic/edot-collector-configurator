@@ -1,0 +1,9 @@
+#!/bin/bash
+set -e
+
+BASEDIR=$(dirname "$0")
+BINARY_DIR="$BASEDIR/binary"
+
+make -C "$BINARY_DIR" build --silent
+
+"$BINARY_DIR"/configurator "$@"
