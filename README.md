@@ -62,4 +62,4 @@ After that, we should find a file named `otel.yml` created in the working dir wi
 
 # License
 
-This software is licensed under the Apache 2 license.
+This software is licensed under the [Apache 2](LICENSE) license.
