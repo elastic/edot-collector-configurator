@@ -122,7 +122,15 @@ func printRecipeInfo(args []string) {
 		}
 		argsDescription += "\n"
 	}
-	fmt.Printf(infoTemplate, recipePath, recipe.Description, argsDescription)
+	fmt.Printf(infoTemplate, indentStr(recipe.Description, 2), argsDescription)
+}
+
+func indentStr(value string, level int) string {
+	result := ""
+	for _, v := range strings.Split(value, "\n") {
+		result += fmt.Sprintf("%s%s\n", strings.Repeat(" ", level), v)
+	}
+	return strings.TrimRight(result, "\n")
 }
 
 func checkRecipeProvided(args []string) error {
