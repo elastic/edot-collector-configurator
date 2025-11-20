@@ -87,7 +87,7 @@ configurations:
 
 ### Refs
 
-Refs are references to maps so that they can be embedded in other maps, which helps to avoid duplicating keys.
+Refs are references to maps so that they can be embedded in other maps, which helps to avoid repeating common map structures across different configurations.
 
 In our `otlp` component example from [above](#configurations), we had the following configurations:
 
@@ -131,3 +131,48 @@ configurations:
 ```
 
 During the recipe build, the refs are resolved and merged on each configuration that uses them.
+
+### Append
+
+When defining base map structures using [refs](#refs), sometimes the base structure misses some extra keys that are needed for a specific configuration only. Append helps adding those items per configuration.
+
+Using our previous example [refs](#refs), we can add a new key at the same level as `protocols` like this:
+
+```yaml
+# Adding configuration-specific items with append
+refs:
+  base:
+    protocols: $refs.protocol_details
+
+configurations:
+  grpc:
+    content: $refs.base
+    refs:
+      protocol_details:
+        grpc:
+          endpoint: 0.0.0.0:4317
+  http:
+    content:
+    refs:
+      protocol_details:
+        http:
+          endpoint: 0.0.0.0:4318
+    append:
+      - path: "$" # This value must be a "YAML Path". The "$" represents the root object of an item in a YAML Path.
+        content:
+          something: some extra value
+```
+
+The final output of building the `http` configuration would look like the following:
+
+```yaml
+# Final form of the http configuration after used in a recipe
+otlp:
+  protocols:
+    http:
+      endpoint: 0.0.0.0:4318
+    something: some extra value
+```
+
+> [!NOTE]
+> The `path` object used in an `append` item uses a YAML path format. (well, partially supported format, you can only create paths that lead to maps or lists).
