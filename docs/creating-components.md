@@ -79,7 +79,7 @@ vars: # Map with "global vars". These can be overridden per configuration or fro
   test-var: global value
   test-var2: global value 2
 configurations: 
-  my-config-nam: 
+  my-config-name: 
     content: 
       some_key: some value $vars.test-var2
       another_key: a value that uses a var, $vars.test-var.
@@ -89,7 +89,7 @@ configurations:
 
 ### Refs
 
-Refs are references to maps so that they can be embedded in other maps, which helps to avoid repeating common map structures across different configurations.
+Refs are references to maps that can be embedded in other maps, which helps to avoid repeating common map structures across different configurations.
 
 In our `otlp` component example from [above](#configurations), we had the following configurations:
 
@@ -138,7 +138,7 @@ During the recipe build, the refs are resolved and merged on each configuration 
 
 When defining base map structures using [refs](#refs), sometimes the base structure misses some extra keys that are needed for a specific configuration only. Append helps adding those items per configuration.
 
-Using our previous example [refs](#refs), we can add a new key at the same level as `protocols` like this:
+Using our previous example from [refs](#refs), we can add a new key at the same level as `protocols` like this:
 
 ```yaml
 # Adding configuration-specific items with append
@@ -173,7 +173,7 @@ otlp:
   protocols:
     http:
       endpoint: 0.0.0.0:4318
-    something: some extra value
+  something: some extra value
 ```
 
 > [!NOTE]
