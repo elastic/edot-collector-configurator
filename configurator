@@ -4,6 +4,6 @@ set -e
 BASEDIR=$(dirname "$0")
 BINARY_DIR="$BASEDIR/binary"
 
-make -C "$BINARY_DIR" build --silent
+(cd $BINARY_DIR && go build -o configurator .)
 
 "$BINARY_DIR"/configurator "$@"
