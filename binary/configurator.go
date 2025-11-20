@@ -93,9 +93,9 @@ func getComponentsDirPath() string {
 }
 
 var infoTemplate = `
-Recipe path: %s
-Description: %s
-Arguments:
+DESCRIPTION
+%s
+ARGUMENTS
 %s
 `
 
