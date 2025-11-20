@@ -35,7 +35,6 @@ components: # Set of components that form this recipe.
     name: custom-name # This name is optional. When provided will be appended to the type like so: "type/name". This is based on naming configs from the uptream specs.
     vars:
       elastic_endpoint: $args.elastic_endpoint 
-  elasticapm-connector:
 
 service: # The same upstream structure: https://opentelemetry.io/docs/collector/configuration/#service
   pipelines:
