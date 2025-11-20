@@ -45,7 +45,7 @@ service: # The same upstream structure: https://opentelemetry.io/docs/collector/
 
 ### Args
 
-Arguments define the values required from the user—these can come from CLI flags or environment variables. Arguments are referenced throughout the recipe using `$args.<name>`.
+Arguments define the values required from the user — these can come from CLI flags or environment variables. Arguments are referenced throughout the recipe using `$args.<name>`.
 
 ```yaml
 args: # Provided by the user from either the command line or an environment variable.
@@ -54,7 +54,7 @@ args: # Provided by the user from either the command line or an environment vari
     env: ELASTIC_URL # The name of the asociated environment variable for this argument. This will be looked out for when no command line argument is provided.
 ```
 
-Use arguments whenever you need user-configurable input—for example, endpoints, credentials, or feature toggles.
+Use arguments whenever you need user-configurable input — for example, endpoints, credentials, or feature toggles.
 
 ### Components
 
