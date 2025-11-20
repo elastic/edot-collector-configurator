@@ -4,7 +4,7 @@ Components are reusable parts/fragments of an EDOT Collector config file that ar
 
 ## Structure
 
-```yaml
+```
 vars: # Map with "global vars". These can be overridden per configuration or from the recipe.
   test-var: global value
   test-var2: global value 2
