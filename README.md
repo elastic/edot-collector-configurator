@@ -1,45 +1,74 @@
 # EDOT Collector Configurator
 
-Creates configuration files for the [EDOT Collector](https://www.elastic.co/docs/reference/edot-collector) based on predefined use cases, or "recipes".
+The **EDOT Collector Configurator** is a small utility that generates
+configuration files for the [EDOT
+Collector](https://www.elastic.co/docs/reference/edot-collector) based
+on predefined use cases, called **recipes**.\
+Recipes allow you to quickly build valid, parameterized collector
+configurations without editing YAML manually.
 
-## 💻 System requirements
+## 💻 System Requirements
 
-- [Golang](https://go.dev/doc/install) 
+-   [Golang](https://go.dev/doc/install)
 
-## 📄 Building a configuration
+## 🚀 Quick Start
 
-### Step 1 - look for a recipe
+To generate a configuration:
 
-Look for a recipe that you'd like to use within the [recipes](recipes) dir.
+1.  Pick a recipe from the `recipes/` directory.
+2.  Inspect the recipe and view its required arguments.
+3.  Build a configuration file using those arguments.
 
-### Step 2 - learn about the recipe's arguments
+The following sections explain each step in detail.
 
-Recipes might require arguments to be provided wither via the command line or via environment variables, you can learn
-about those arguments and also get a detaild description of what the recipe does, by running the following command:
+## 📄 Building a Configuration
 
-```shell
+### Step 1 --- Choose a recipe
+
+Browse the available recipes in the [`recipes`](recipes) directory and
+select one that matches your use case.
+
+### Step 2 --- View recipe arguments
+
+Recipes may require arguments, which can be provided either on the
+command line or via environment variables.
+
+Run:
+
+``` shell
 ./configurator info path/to/recipe.yml
 ```
 
-### Step 3 (final step) - build your configuration
-Build your config file using the previously chosen recipe
+This command prints:
 
-```shell
-./configurator build path/to/recipe.yml [-output=otel.yml] [recipe args as shown in step 2]
+-   A detailed description of what the recipe does\
+-   A list of required and optional arguments\
+-   The associated environment variable names (if applicable)
+
+### Step 3 --- Build the configuration
+
+Use the recipe and provide the required arguments:
+
+``` shell
+./configurator build path/to/recipe.yml [-output=otel.yml] [recipe args...]
 ```
 
-### Example
+If `-output` is omitted, the output file defaults to `otel.yml`.
 
-Let's use this test recipe: [recipes/gateway/test/otlp.yml](recipes/gateway/test/otlp.yml)
+## 🧪 Example
 
-First, we learn about its args:
+We'll use the test recipe:\
+`recipes/gateway/test/otlp.yml`
 
-```shell
+### 1. Inspect the recipe
+
+``` shell
 ./configurator info recipes/gateway/test/otlp.yml
 ```
-```txt
-## This is the output of the info command
 
+Example output:
+
+``` txt
 DESCRIPTION
   Receives OTLP data over HTTP (on port 4318) and gRPC (on port 4317) and exports it to Elasticsearch.
 
@@ -48,16 +77,21 @@ ARGUMENTS
   -Aelastic_api_key    Your Elasticsearch API Key (ENV var 'ELASTIC_API_KEY')
 ```
 
-Then we can **build** a config from it like so:
+### 2. Build the configuration
 
-```shell
-# Optional, setting one of the ARGs via environment variable
+You can pass arguments as flags or environment variables:
+
+``` shell
+# Optional: set one argument via an environment variable
 export ELASTIC_API_KEY=MY_ES_API_KEY
+
+# Build the configuration file
 ./configurator build recipes/gateway/test/otlp.yml -Aelastic_endpoint=http://localhost:9200
 ```
 
-After that, we should find a file named `otel.yml` created in the working dir with our final config file.
+A file named `otel.yml` will be created in the working directory
+containing the generated EDOT Collector configuration.
 
-# License
+## 📜 License
 
 This software is licensed under the [Apache 2](LICENSE) license.
