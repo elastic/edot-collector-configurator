@@ -203,7 +203,7 @@ func resolveStringRef(content string, configRefs refsType) (map[string]any, erro
 	}
 	ref, ok := configRefs[refId]
 	if !ok {
-		return nil, fmt.Errorf("'%s' is not defined", refId)
+		return nil, fmt.Errorf("'%s' (within a component string '%s') is not defined, the available ones are: %v", refId, content, configRefs)
 	}
 	return ref.(map[string]any), nil
 }

@@ -1,17 +1,27 @@
 description: |
-  Receives OTLP data over HTTP and gRPC and exports it to Elasticsearch.
-  It also spins up an OpAMP Server, used to make Central Configuration work with the EDOT Agents.
+  This recipe does 2 things:
+  - Receives OTLP data over HTTP (on port 4318) and gRPC (on port 4317) and exports it to Elasticsearch.
+  - Spins up an OpAMP Server (on port 4320), used to make Central Configuration work with the EDOT Agents.
+  
+  The full OpAMP endpoint to use is: http://localhost:4320/v1/opamp
 args:
   elastic_endpoint:
     description: Your Elasticsearch endpoint
     env: ELASTIC_URL
   elastic_api_key:
-    description: Your Elasticseatch API Key
+    description: Your Elasticsearch API Key
     env: ELASTIC_API_KEY
+const:
+  otlp_http_port: 4318
+  otlp_grpc_port: 4317
+  opamp_port: 4320
 components:
   otlp:
     source: receivers/otlp.yml
     configurations: [ http, grpc ]
+    vars:
+      http_port: $const.otlp_http_port
+      grpc_port: $const.otlp_grpc_port
   elasticapm-connector:
     source: connectors/elasticapm.yml
   elasticsearch-exporter:
@@ -35,6 +45,7 @@ components:
     vars:
       endpoint: $args.elastic_endpoint
       authenticator: $components.bearerauth
+      http_port: $const.opamp_port
 service:
   extensions: [ $components.bearerauth, $components.apmconfig ]
   pipelines:

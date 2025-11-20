@@ -159,18 +159,18 @@ func resolvePlaceholdersInString(target string, placeholderPattern regexp.Regexp
 		if ok {
 			return mapValue, nil
 		} else {
-			return nil, fmt.Errorf("'%s' is not defined", target)
+			return nil, fmt.Errorf("'%s' is not defined, the available values are: %v", target, values)
 		}
 	} else if placeholderPattern.MatchString(target) {
 		matches := placeholderPattern.FindAllString(target, -1)
 		if len(matches) > 0 {
 			newValue := target
 			for _, v := range slices.Compact(matches) {
-				mapValue, ok := values[v].(string)
+				mapValue, ok := values[v]
 				if ok {
-					newValue = strings.ReplaceAll(newValue, v, mapValue)
+					newValue = strings.ReplaceAll(newValue, v, fmt.Sprintf("%v", mapValue))
 				} else {
-					return nil, fmt.Errorf("'%s' is not defined", v)
+					return nil, fmt.Errorf("'%s' (within the value '%s') is not defined, the available values are: %v", v, target, values)
 				}
 			}
 			return newValue, nil

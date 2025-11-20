@@ -1,3 +1,5 @@
+vars:
+  http_port: "4320"
 configurations:
   default:
     content:
@@ -10,4 +12,4 @@ configurations:
       opamp:
         protocols:
           http:
-            endpoint: "localhost:4320"
+            endpoint: "localhost:$vars.http_port"
