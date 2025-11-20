@@ -17,7 +17,7 @@ refs:
   base:
     es_endpoint: $vars.endpoint
     es_api_key: $vars.api_key
-configuration:
+configurations:
   default:
     content: $refs.base
   someconfig:

@@ -29,9 +29,9 @@ type configurationType struct {
 }
 
 type componentType struct {
-	Configuration map[string]configurationType `validate:"required"`
-	Vars          varsType
-	Refs          refsType
+	Configurations map[string]configurationType `validate:"required"`
+	Vars           varsType
+	Refs           refsType
 }
 
 var (
@@ -57,7 +57,7 @@ func BuildComponent(source io.Reader, params ComponentParams) (map[string]any, e
 		configs = []string{"default"}
 	}
 	for _, key := range configs {
-		configuration, ok := component.Configuration[key]
+		configuration, ok := component.Configurations[key]
 		if !ok {
 			return nil, fmt.Errorf("couldn't find configuration named '%v'", key)
 		}

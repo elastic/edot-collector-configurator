@@ -8,7 +8,7 @@ import (
 )
 
 var simpleConfiguration = `
-configuration:
+configurations:
   default:
     content:
       endpoint: default_endpoint
@@ -20,7 +20,7 @@ configuration:
 `
 
 var mergeableConfiguration = `
-configuration:
+configurations:
   http:
     content:
       protocol:
@@ -34,7 +34,7 @@ configuration:
 `
 
 var unmergeableConfiguration = `
-configuration:
+configurations:
   first:
     content:
       protocol:
@@ -53,7 +53,7 @@ vars:
   second: false
   third: global_third
   fourth: global_fourth
-configuration:
+configurations:
   default:
     content:
       first_placeholder: $vars.first
@@ -74,7 +74,7 @@ vars:
   one: valid
   two:
     not_valid: true
-configuration:
+configurations:
   default:
     content: {}
 `
@@ -82,7 +82,7 @@ configuration:
 var configurationWithMissingVars = `
 vars:
   first: global_first
-configuration:
+configurations:
   default:
     content:
       first_placeholder: $vars.first
@@ -99,7 +99,7 @@ refs:
     second_placeholder: $vars.second
     some_key: some value
     some_other_ref: $refs.config_details
-configuration:
+configurations:
   default:
     content: $refs.base
     refs:
@@ -123,7 +123,7 @@ refs:
       - Monday
       - Tuesday
       - Wednesday
-configuration:
+configurations:
   default:
     content: $refs.base
     append:
