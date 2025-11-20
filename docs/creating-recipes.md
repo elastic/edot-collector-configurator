@@ -2,12 +2,14 @@
 
 ## Quickstart
 
-- Create a yaml file for your recipe. It could be place anywhere, just make sure to pass the full path to it when calling the configurator script.
-- Add items to it depdending on your needs. You can find the types of items you can add below.
+- Create a YAML file to define your recipe. You can place it anywhere — just be sure to pass the full file path to the configurator script.
+- Add items to the file as needed. The sections and item types you can include are explained below.
 
-You can take a look at some existing recipes for inspiration.
+For inspiration, you can browse existing recipes provided in the repository.
 
 ## Structure Overview
+
+The structure of a recipe consists of descriptive metadata, user-provided arguments, constants, components, and finally the service configuration. Below is an annotated example:
 
 ```yaml
 description: "Explains the outcome of this recipe"
@@ -44,7 +46,7 @@ service: # The same upstream structure: https://opentelemetry.io/docs/collector/
 
 ### Args
 
-The args contain a map of arguments that must be provided either via command line arguments or environment variables.
+Arguments define the values required from the user—these can come from CLI flags or environment variables. Arguments are referenced throughout the recipe using $args.<name>.
 
 ```yaml
 args: # Provided by the user from either the command line or an environment variable.
@@ -53,12 +55,21 @@ args: # Provided by the user from either the command line or an environment vari
     env: ELASTIC_URL # The name of the asociated environment variable for this argument. This will be looked out for when no command line argument is provided.
 ```
 
+Use arguments whenever you need user-configurable input—for example, endpoints, credentials, or feature toggles.
+
 ### Components
 
-A map of the components that will be used by the recipe. You must search for the components you need from within the [components](../components/) folder.
+Components define the actual building blocks of your recipe — receivers, processors, exporters, connectors, and so on. These components are sourced from the [components](../components/) directory.
 
 > [!NOTE]
 > Can't find a component you need? - You can follow [this guide](../docs/creating-components.md) to create one.
+
+Each component can specify:
+
+- The component file (source).
+- Which configuration variants to use from the component (configurations).
+- An optional name override (name) - If provided, it will be added after the `type` with `[/name], as specified in the upstream OTel collector config.
+- Variables (vars) that override defaults inside the component itself.
 
 ```yaml
 components: # Set of components that form this recipe.
@@ -71,11 +82,17 @@ components: # Set of components that form this recipe.
       endpoint: $args.some_arg and $const.some_constant and $components.other-component # You can add args, const and other component names here.
 ```
 
+Components can refer to:
+
+- Arguments ($args.<name>)
+- Constants ($const.<name>)
+- Other component names ($components.<component-name>)
+
+This makes complex configuration generation flexible and reusable.
+
 ### Service
 
-This is the exact same `service` config defined upstream: https://opentelemetry.io/docs/collector/configuration/#service
-
-The only difference is that we'll use references to components as its values.
+The service block follows the same structure as the [upstream OpenTelemetry Collector configuration](https://opentelemetry.io/docs/collector/configuration/#service). The only difference is that instead of writing component names directly, you reference your defined components using $components.<name>.
 
 ```yaml
 service: 
