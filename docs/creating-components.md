@@ -37,6 +37,16 @@ configurations:
 
 A component can have multiple configurations, and each one must define its contents within a `content` object. 
 
+```yaml
+# Simple configuration example
+configurations:
+  my-config-name:
+    content:
+      my-key: my value
+```
+
+### Example
+
 For example, this is the upstream's [otlp config](https://opentelemetry.io/docs/collector/configuration/#receivers) definition:
 
 ```yaml
@@ -50,7 +60,7 @@ receivers:
         endpoint: 0.0.0.0:4318
 ```
 
-We can translate that example `otlp` config to a configurator component like this:
+We can translate that example `otlp` config to a component, like this:
 
 ```yaml
 configurations:
@@ -67,12 +77,14 @@ configurations:
           endpoint: 0.0.0.0:4318
 ```
 
-When a single configuration is needed for a component, it should be named `default`. Configurations named `default` are used by the
-recipes that do not specify the configuration names that they need from a component. 
+When a single configuration is defined for a component, it should be named `default`. Configurations named `default` are used by the
+recipes that do not specify any configuration name to use from a component file.
 
 ## Vars
 
 Variables may be declared globally or per configuration and they can be overridden by variables defined from the recipe file.
+
+You can reference them within any content's value (even content from [refs](#refs) and [append](#append) blocks) using the `$vars.` prefix, as shown in the example below.
 
 > [!IMPORTANT]
 > Vars can only contain primitive values (string, boolean and numbers). The configurator will raise an error if an object is set there.
@@ -100,12 +112,12 @@ Refs are references to maps that can be embedded in other maps, which helps to a
 configurations:
   grpc:
     content:
-      protocols:
+      protocols: # Repeated key across configs
         grpc:
           endpoint: 0.0.0.0:4317
   http:
     content:
-      protocols:
+      protocols: # Repeated key across configs
         http:
           endpoint: 0.0.0.0:4318
 ```
