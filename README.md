@@ -50,7 +50,7 @@ ARGUMENTS
   -Aelastic_api_key    Your Elasticsearch API Key (ENV var 'ELASTIC_API_KEY')
 ```
 
-Then we can call build a config from it like so:
+Then we can **build** a config from it like so:
 
 ```shell
 # Optional, setting one of the ARGs via environment variable
