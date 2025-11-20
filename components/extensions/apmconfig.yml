@@ -1,5 +1,5 @@
 vars:
-  http_port: "4320"
+  http_port: 4320
 configurations:
   default:
     content:
