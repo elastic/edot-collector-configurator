@@ -1,9 +1,9 @@
 # EDOT Collector Configurator
 
 The **EDOT Collector Configurator** is a small utility that generates
-configuration files for the [EDOT
-Collector](https://www.elastic.co/docs/reference/edot-collector) based
+configuration files for the [EDOT Collector](https://www.elastic.co/docs/reference/edot-collector) based
 on predefined use cases, called **recipes**.
+
 Recipes allow you to quickly build valid, parameterized collector
 configurations without editing YAML manually.
 
