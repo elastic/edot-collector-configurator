@@ -23,12 +23,12 @@ The following sections explain each step in detail.
 
 ## 📄 Building a Configuration
 
-### Step 1 --- Choose a recipe
+### Step 1 - Choose a recipe
 
 Browse the available recipes in the [`recipes`](recipes) directory and
 select one that matches your use case.
 
-### Step 2 --- View recipe arguments
+### Step 2 - View recipe arguments
 
 Recipes may require arguments, which can be provided either on the
 command line or via environment variables.
@@ -41,11 +41,11 @@ Run:
 
 This command prints:
 
--   A detailed description of what the recipe does\
--   A list of required and optional arguments\
+-   A detailed description of what the recipe does
+-   A list of required and optional arguments
 -   The associated environment variable names (if applicable)
 
-### Step 3 --- Build the configuration
+### Step 3 - Build the configuration
 
 Use the recipe and provide the required arguments:
 
@@ -92,6 +92,6 @@ export ELASTIC_API_KEY=MY_ES_API_KEY
 A file named `otel.yml` will be created in the working directory
 containing the generated EDOT Collector configuration.
 
-## 📜 License
+## License
 
 This software is licensed under the [Apache 2](LICENSE) license.
