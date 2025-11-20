@@ -9,7 +9,7 @@ For inspiration, you can browse existing recipes provided in the repository.
 
 ## Structure Overview
 
-The structure of a recipe consists of descriptive metadata, user-provided arguments, constants, components, and finally the service configuration. Below is an annotated example:
+The structure of a recipe consists of a description, user-provided arguments, constants, components, and finally the service configuration. Below is an annotated example:
 
 ```yaml
 description: "Explains the outcome of this recipe"
