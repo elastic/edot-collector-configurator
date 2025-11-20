@@ -46,7 +46,7 @@ service: # The same upstream structure: https://opentelemetry.io/docs/collector/
 
 ### Args
 
-Arguments define the values required from the user—these can come from CLI flags or environment variables. Arguments are referenced throughout the recipe using $args.<name>.
+Arguments define the values required from the user—these can come from CLI flags or environment variables. Arguments are referenced throughout the recipe using `$args.<name>`.
 
 ```yaml
 args: # Provided by the user from either the command line or an environment variable.
@@ -68,7 +68,7 @@ Each component can specify:
 
 - The component file (source).
 - Which configuration variants to use from the component (configurations).
-- An optional name override (name) - If provided, it will be added after the `type` with `[/name], as specified in the upstream OTel collector config.
+- An optional custom name (name) - If provided, it will be added after the `type` with the format `type[/name]`, as specified in the upstream OTel collector config.
 - Variables (vars) that override defaults inside the component itself.
 
 ```yaml
@@ -84,15 +84,15 @@ components: # Set of components that form this recipe.
 
 Components can refer to:
 
-- Arguments ($args.<name>)
-- Constants ($const.<name>)
-- Other component names ($components.<component-name>)
+- Arguments (`$args.<name>`)
+- Constants (`$const.<name>`)
+- Other component names (`$components.<component-name>`)
 
 This makes complex configuration generation flexible and reusable.
 
 ### Service
 
-The service block follows the same structure as the [upstream OpenTelemetry Collector configuration](https://opentelemetry.io/docs/collector/configuration/#service). The only difference is that instead of writing component names directly, you reference your defined components using $components.<name>.
+The service block follows the same structure as the [upstream OpenTelemetry Collector configuration](https://opentelemetry.io/docs/collector/configuration/#service). The only difference is that instead of writing component names directly, you reference your defined components using `$components.<name>`.
 
 ```yaml
 service: 
