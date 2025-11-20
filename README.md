@@ -3,7 +3,7 @@
 The **EDOT Collector Configurator** is a small utility that generates
 configuration files for the [EDOT
 Collector](https://www.elastic.co/docs/reference/edot-collector) based
-on predefined use cases, called **recipes**.\
+on predefined use cases, called **recipes**.
 Recipes allow you to quickly build valid, parameterized collector
 configurations without editing YAML manually.
 
@@ -62,8 +62,7 @@ If `-output` is omitted, the output file defaults to `otel.yml`.
 
 ## 🧪 Example
 
-We'll use the test recipe:\
-`recipes/gateway/test/otlp.yml`
+We'll use the test recipe: `recipes/gateway/test/otlp.yml`
 
 ### 1. Inspect the recipe
 
