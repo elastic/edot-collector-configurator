@@ -60,7 +60,7 @@ configurations:
           endpoint: 0.0.0.0:4318
 ```
 
-> [!INFORMATION]
+> [!NOTE]
 > The `content` only has the `protocols` item, and it doesn't add its parents (`otlp` and `receivers`). This is intentional, as those parents will be added later during the recipe build.
 
 You may define as many configurations as needed. Make sure to select the ones you want for a recipe within the recipe file.
