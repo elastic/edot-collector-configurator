@@ -1,4 +1,4 @@
-configuration:
+configurations:
   default:
     content:
       scheme: APIKey

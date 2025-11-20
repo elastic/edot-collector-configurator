@@ -4,7 +4,7 @@ refs:
     api_key: $vars.elastic_api_key
     mapping:
       mode: otel
-configuration:
+configurations:
   default:
     content: $refs.base
   insecure:

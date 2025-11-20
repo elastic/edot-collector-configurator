@@ -2,7 +2,7 @@ vars:
   size: 1000
   max_size: 1500
   timeout: 1s
-configuration:
+configurations:
   default:
     content:
       send_batch_size: $vars.size
