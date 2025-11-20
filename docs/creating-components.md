@@ -190,3 +190,34 @@ otlp:
 
 > [!NOTE]
 > The `path` object used in an `append` item uses a YAML path format. Only simple paths to maps or lists are supported.
+
+## Location of the component file
+
+Components MUST be located within the [components](../components) folder and under the directory that fits its category.
+
+For example, if we wanted to create a processor component named `debug`, we must locate it in a file named `debug.yml` within the `components/processors` folder, like so:
+
+```
+components/
+├─ processors/
+│  ├─ debug.yml # This will be our new component file
+```
+
+This is needed because the configurator script will take the file name (without the .yml part) as the component's type, and its parent folder name as the component's category.
+
+Considering that this is our component file contents:
+
+```yaml
+# Contents of components/processors/debug.yml
+configurations:
+  default:
+    something: some value
+```
+
+This is how that component will be added to the final config:
+
+```yaml
+processors:
+  debug: # If a custom name is provided, e.g. "my-name", then the final result will be: "debug/my-name".
+    something: some value
+```
