@@ -20,7 +20,7 @@ Recipes might require arguments to be provided wither via the command line or vi
 about those arguments and also get a detaild description of what the recipe does, by running the following command:
 
 ```shell
-./configurator info [path/to/recipe.yml]
+./configurator info path/to/recipe.yml
 ```
 
 ### Step 3 (final step) - build your configuration
