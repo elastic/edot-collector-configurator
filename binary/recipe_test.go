@@ -103,7 +103,7 @@ func TestBuildRecipe(t *testing.T) {
 				"es_endpoint": "http://recipe.global.endpoint",
 			},
 		},
-		"services": map[string]any{
+		"service": map[string]any{
 			"pipelines": map[string]any{
 				"traces": map[string]any{
 					"exporters": []any{"dummy/custom-name"},

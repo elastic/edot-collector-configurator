@@ -76,7 +76,7 @@ func BuildRecipe(recipe *recipeType, params RecipeParams) (map[string]any, error
 		return nil, err
 	}
 	err = mergeMaps(builtComponents, map[string]any{
-		"services": resolvedServices,
+		"service": resolvedServices,
 	})
 	if err != nil {
 		return nil, err
