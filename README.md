@@ -2,8 +2,6 @@
 
 Creates configuration files for the [EDOT Collector](https://www.elastic.co/docs/reference/edot-collector) based on predefined use cases, or "recipes".
 
-# Usage
-
 ## 💻 System requirements
 
 - [Golang](https://go.dev/doc/install) 
