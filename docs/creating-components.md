@@ -4,6 +4,11 @@ Components are reusable fragments of an EDOT Collector configuration.
 They encapsulate pieces of YAML that can be parameterized, reused, and
 referenced within recipes.
 
+## Quickstart
+
+- Create a YAML file within the [components](../components/) directory. This file must be located within the relevant folder (i.e. `processors` if it's a processor component) and its name MUST be the type of the processor. More info on this [below](#location-of-the-component-file).
+- Add at least one configuration to this component file with the contents you need for it. Configurations are the only required items in a component, though you should still take a look at the other tools available in case they can help too.
+
 ## Structure Overview
 
 Below is the full component structure. Only

@@ -1,5 +1,12 @@
 # Creating recipes
 
+## Quickstart
+
+- Create a yaml file for your recipe. It could be place anywhere, just make sure to pass the full path to it when calling the configurator script.
+- Add items to it depdending on your needs. You can find the types of items you can add below.
+
+You can take a look at some existing recipes for inspiration.
+
 ## Structure Overview
 
 ```yaml
