@@ -8,7 +8,7 @@ Components are reusable parts/fragments of an EDOT Collector config file that ar
 > Only the `configurations` object is mandatory. The rest are optional.
 
 ```diff
-# vars: # Map with "global vars". These can be overridden per configuration or from the recipe.
+#! vars: # Map with "global vars". These can be overridden per configuration or from the recipe. !
 #  test-var: global value
 #  test-var2: global value 2
 #refs: {} # References to map structures that are shared across configurations. Useful to avoid repeating map keys/values.
