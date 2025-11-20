@@ -141,9 +141,7 @@ func checkRecipeProvided(args []string) error {
 }
 
 func getRecipe(recipeFilePath string) recipeType {
-	wd, err := os.Getwd()
-	checkUnexpectedError(err)
-	f, err := os.Open(filepath.Join(wd, recipeFilePath))
+	f, err := os.Open(recipeFilePath)
 	checkUnexpectedError(err)
 	defer f.Close()
 
