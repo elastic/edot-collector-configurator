@@ -45,7 +45,7 @@ This command prints:
 -   A list of required arguments (with associated environment variables, if applicable)
 
 > [!NOTE]
-> Command line arguments have preference over environment variables.
+> Command line arguments have preference over environment variables when both are available.
 
 ### Step 3 - Build the configuration
 
