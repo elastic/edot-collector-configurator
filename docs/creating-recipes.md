@@ -1,6 +1,6 @@
 # Creating recipes
 
-## Quickstart
+## Quick Start
 
 - Create a YAML file to define your recipe. You can place it anywhere — just be sure to pass the appropiate file path to the configurator script later when you use it.
 - Add items to the file as needed. The sections and item types you can include are explained below.
