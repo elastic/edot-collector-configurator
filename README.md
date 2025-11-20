@@ -28,6 +28,9 @@ The following sections explain each step in detail.
 Browse the available recipes in the [`recipes`](recipes) directory and
 select one that matches your use case.
 
+> [!NOTE]
+> Can't find a recipe you need? - You can follow [this guide](docs/creating-recipes.md) to create one.
+
 ### Step 2 - View recipe arguments
 
 Recipes may require arguments, which can be provided either on the

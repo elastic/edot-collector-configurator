@@ -48,7 +48,10 @@ args: # Provided by the user from either the command line or an environment vari
 
 ### Components
 
-A map of the components that will be used by the recipe.
+A map of the components that will be used by the recipe. You must search for the components you need from within the [components](../components/) folder.
+
+> [!NOTE]
+> Can't find a component you need? - You can follow [this guide](../docs/creating-components.md) to create one.
 
 ```yaml
 components: # Set of components that form this recipe.
