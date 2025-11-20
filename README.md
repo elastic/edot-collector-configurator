@@ -42,8 +42,10 @@ Run:
 This command prints:
 
 -   A detailed description of what the recipe does
--   A list of required and optional arguments
--   The associated environment variable names (if applicable)
+-   A list of required arguments (with associated environment variables, if applicable)
+
+> [!NOTE]
+> Command line arguments have preference over environment variables.
 
 ### Step 3 - Build the configuration
 
