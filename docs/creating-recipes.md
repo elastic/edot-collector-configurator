@@ -19,7 +19,7 @@ args: # Provided by the user from either the command line or an environment vari
     description: Your Elasticsearch endpoint
     env: ELASTIC_URL # The name of the asociated environment variable for this argument. This will be looked out for when no command line argument is provided.
 
-const: # This is just handy to avoid duplicating values across this file.
+const: # This is optional. Serves as a handy way to avoid duplicating values across this file.
   some_constant: some value
 
 components: # Set of components that form this recipe.
