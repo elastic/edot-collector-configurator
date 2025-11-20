@@ -251,7 +251,7 @@ func TestBuildComponent(t *testing.T) {
 			input:                configurationWithMissingVars,
 			componentName:        "dummy",
 			configurations:       []string{"default"},
-			expectedErrorMessage: "'$vars.second' is not defined",
+			expectedErrorMessage: "'$vars.second' is not defined, the available values are: map[$vars.first:global_first]",
 			shouldFail:           true,
 		},
 		{
