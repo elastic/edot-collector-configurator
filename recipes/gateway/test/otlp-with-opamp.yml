@@ -16,6 +16,7 @@ components:
     source: connectors/elasticapm.yml
   elasticsearch-exporter:
     source: exporters/elasticsearch.yml
+    configurations: [insecure]
     vars:
       elastic_endpoint: $args.elastic_endpoint
       elastic_api_key: $args.elastic_api_key
